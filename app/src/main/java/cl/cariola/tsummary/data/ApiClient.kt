@@ -40,21 +40,25 @@ class ApiClient {
                 val strResponse = response?.body()?.string()
                 val jsonObject = JSONObject(strResponse)
                 val token = jsonObject.getString("token")
-                //val estado = jsonObject.getInt("estado")
+                val estado = jsonObject.getInt("estado")
                 //val mensaje = jsonObject.getString("mensaje")
 
-                val jwt = JWT(token)
-                val id = jwt.getClaim("AboId").asInt()
-                val nombre = jwt.getClaim ("Nombre").asString()
-                val perfil = jwt.getClaim("Perfil").asString()
-                val grupo = jwt.getClaim("Grupo").asString()
-                val email = jwt.getClaim("Email").asString()
-                val usuario = Usuario(id!!, nombre!!, perfil!!, grupo!!)
+                if (estado == 1) {
 
-                val loginName = jwt.getClaim("LoginName").asString()
-                val cuenta = Cuenta(imei, loginName!!, password, usuario)
-                Log.d("INFO", "${nombre}->${perfil}->${grupo}->${email}->${id}")
-                asyncResponse?.send(cuenta)
+                    val jwt = JWT(token)
+                    val id = jwt.getClaim("AboId").asInt()
+                    val nombre = jwt.getClaim("Nombre").asString()
+                    val perfil = jwt.getClaim("Perfil").asString()
+                    val grupo = jwt.getClaim("Grupo").asString()
+                    val email = jwt.getClaim("Email").asString()
+                    val usuario = Usuario(id!!, nombre!!, perfil!!, grupo!!)
+
+                    val loginName = jwt.getClaim("LoginName").asString()
+                    val cuenta = Cuenta(imei, loginName!!, password, usuario)
+                    Log.d("INFO", "${nombre}->${perfil}->${grupo}->${email}->${id}")
+                    asyncResponse?.send(cuenta)
+
+                }
             }
         })
     }
