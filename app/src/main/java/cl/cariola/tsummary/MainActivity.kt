@@ -19,7 +19,6 @@ class MainActivity : AppCompatActivity(), AsyncResponse {
         setContentView(R.layout.activity_main)
         val listView = findViewById<ListView>(R.id.main_listview)
         //listView.adapter = MyCustomAdapter(this)
-
         //val client = ApiClient()
         //client.asyncResponse = this
         //client.registrar("863166032574597", "Carlos_Tapia", "Car.2711")
@@ -29,9 +28,8 @@ class MainActivity : AppCompatActivity(), AsyncResponse {
     }
 
 
-    override fun send(data: Any) {
-
-
+    override fun send(data: Any)
+    {
 
     }
 

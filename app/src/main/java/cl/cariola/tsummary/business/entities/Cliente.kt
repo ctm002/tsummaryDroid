@@ -1,6 +1,7 @@
 package cl.cariola.tsummary.business.entities
 
-data class Cliente(
+data class Cliente (
     var nombre: String,
-    var codigo: Int
+    var codigo: Int,
+    var proyectos: ArrayList<Proyecto>?
 )
