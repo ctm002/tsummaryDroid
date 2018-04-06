@@ -15,7 +15,14 @@ class Autentificar(context: Context) : AsyncResponse  {
         this.mContext = context
     }
 
-    override fun send(response: Any) {
+    fun registrar(imei: String, userName: String, password: String){
+
+        val client = ApiClient()
+        client.asyncResponse = this
+        client.registrar(imei, userName, password)
+    }
+
+    override fun recive(response: Any) {
         if (response is SesionLocal)
         {
             var db = DataBaseHandler(this.mContext!!)
@@ -25,14 +32,9 @@ class Autentificar(context: Context) : AsyncResponse  {
             val client = ApiClient()
             client.asyncResponse = this
             //val clientes =  client.pullClientes(response)
-            //val horas = client.pullHoras(response)
+            val horas = client.pullHoras(response)
         }
     }
 
-    fun registrar(imei: String, userName: String, password: String){
 
-        val client = ApiClient()
-        //client.asyncResponse = this
-        //client.registrar(imei, userName, password)
-    }
 }

@@ -4,8 +4,10 @@ import cl.cariola.tsummary.AsyncResponse
 import org.json.JSONObject
 import java.net.URL
 import cl.cariola.tsummary.business.entities.*
+import com.auth0.android.jwt.JWT
 import okhttp3.MediaType
 import org.json.JSONArray
+import java.io.IOException
 import javax.net.ssl.*
 
 class ApiClient {
@@ -16,13 +18,47 @@ class ApiClient {
 
     fun registrar(imei: String, userName: String, password: String)
     {
-        /*
+
         var json = JSONObject()
         json.put("imei",imei)
         json.put("usuario", userName)
         json.put("password",password)
         val strJSON =  json.toString()
 
+        var httpClient = getHttpClient("tokenmobile", "POST", true)
+        val postData: ByteArray = strJSON.toByteArray(Charsets.UTF_8)
+        httpClient.setRequestProperty("Content-Length", postData.size.toString())
+        httpClient.outputStream.write(postData)
+
+        try
+        {
+            val buffer = httpClient.inputStream.bufferedReader(Charsets.UTF_8)
+            val strResponse = buffer.readText()
+            val jsonObject = JSONObject(strResponse)
+            val token = jsonObject.getString("token")
+            val estado = jsonObject.getInt("estado")
+            if (estado == 1) {
+
+                val jwt = JWT(token)
+                val loginName = jwt.getClaim("LoginName").asString()
+                val expiresAt = jwt.expiresAt!!
+                val cuenta = Cuenta(loginName!!, password, imei)
+
+                val id : Int = jwt.getClaim("AboId").asInt()!!
+                val nombre : String = jwt.getClaim("Nombre").asString()!!
+                val perfil : String = jwt.getClaim("Perfil").asString()!!
+                val grupo : String = jwt.getClaim("Grupo").asString()!!
+                val email : String = jwt.getClaim("Email").asString()!!
+                val idUsuario : Int = jwt.getClaim("IdUsuario").asInt()!!
+                val usuario = Usuario(id, nombre, perfil, grupo, email, idUsuario, cuenta)
+                Log.d("INFO", "${nombre}->${perfil}->${grupo}->${email}->${id}")
+                var sesionLocal = SesionLocal(usuario, token, expiresAt)
+                asyncResponse?.recive(sesionLocal)
+            }
+        }
+        catch (e: Exception){}
+
+        /*
         var requestBody = okhttp3.RequestBody.create(JSON, strJSON)
         var url = URL("https://docroom.cariola.cl/tokenmobile")
 
@@ -49,7 +85,6 @@ class ApiClient {
                 if (estado == 1) {
 
                     val jwt = JWT(token)
-
                     val loginName = jwt.getClaim("LoginName").asString()
                     val expiresAt = jwt.expiresAt!!
                     val cuenta = Cuenta(loginName!!, password, imei)
@@ -72,7 +107,6 @@ class ApiClient {
             }
         })
         */
-
     }
 
     /*
@@ -144,13 +178,13 @@ class ApiClient {
     fun pullHoras(sesionLocal: SesionLocal): Map<Cliente, List<RegistroHora>>?
     {
         var JSONObject = JSONObject()
-                .put("FechaI", "20100101")
-                .put("FechaF", "20180501")
+                .put("FechaI", "20180415")
+                .put("FechaF", "20180515")
                 .put("tim_correl", 0)
                 .put("AboId", 20)
         val strJSON = JSONObject.toString()
 
-        var httpClient = getHttpClient("/api/Horas/GethorasByParameters", "POST", true)
+        var httpClient = getHttpClient("api/Horas/GethorasByParameters", "POST", true)
         httpClient.setRequestProperty("Authorization", "bearer ${sesionLocal.token}")
         val postData: ByteArray = strJSON.toByteArray(Charsets.UTF_8)
         httpClient.setRequestProperty("Content-Length", postData.size.toString())
@@ -184,7 +218,7 @@ class ApiClient {
 
     fun pullClientes(sesionLocal: SesionLocal) : Map<Cliente, List<Proyecto>>?
     {
-        var httpClient = getHttpClient("/api/ClienteProyecto/getUltimosProyectoByAbogadoMob", "POST", true)
+        var httpClient = getHttpClient("api/ClienteProyecto/getUltimosProyectoByAbogadoMob", "POST", true)
         httpClient.setRequestProperty("Authorization", "bearer ${sesionLocal.token}")
         val strJSON = "{\"abo_id\": 20, \"cantidad\":0}"
         val postData: ByteArray = strJSON.toByteArray(Charsets.UTF_8)
@@ -217,7 +251,7 @@ class ApiClient {
 
     fun getHttpClient( strURL: String, method: String, doOutput: Boolean) : HttpsURLConnection
     {
-        var url = URL("https://$host/api/ClienteProyecto/getUltimosProyectoByAbogadoMob")
+        var url = URL("https://$host/$strURL")
         val httpClient =  url.openConnection() as HttpsURLConnection
         httpClient.doOutput = doOutput
         httpClient.requestMethod = method

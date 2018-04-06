@@ -2,6 +2,7 @@ package cl.cariola.tsummary
 import android.content.Context
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.os.StrictMode
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,12 +24,14 @@ class MainActivity : AppCompatActivity(), AsyncResponse {
         //client.asyncResponse = this
         //client.registrar("863166032574597", "Carlos_Tapia", "Car.2711")
 
+        val policy =  StrictMode.ThreadPolicy.Builder().permitAll().build()
+        StrictMode.setThreadPolicy(policy)
         val controller = Autentificar(this)
         controller.registrar("863166032574597", "Carlos_Tapia", "Car.2711")
     }
 
 
-    override fun send(data: Any)
+    override fun recive(data: Any)
     {
 
     }
