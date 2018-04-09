@@ -9,16 +9,23 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.ListView
 import android.widget.TextView
-import cl.cariola.tsummary.business.controllers.Autentificar
-import cl.cariola.tsummary.data.ApiClient
+import cl.cariola.tsummary.business.controllers.AutentificarController
+import cl.cariola.tsummary.business.controllers.ProyectoController
 import cl.cariola.tsummary.business.entities.RegistroHora
+import java.util.*
 
 class MainActivity : AppCompatActivity(), AsyncResponse {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val listView = findViewById<ListView>(R.id.main_listview)
+        val recyclerView = findViewById<ListView>(R.id.recycler_view_horas)
+
+        val proyectoController = ProyectoController(this)
+        val items = proyectoController.getListHorasByCodigoAndFecha(20, Date())
+
+
+
         //listView.adapter = MyCustomAdapter(this)
         //val client = ApiClient()
         //client.asyncResponse = this
@@ -26,12 +33,13 @@ class MainActivity : AppCompatActivity(), AsyncResponse {
 
         val policy =  StrictMode.ThreadPolicy.Builder().permitAll().build()
         StrictMode.setThreadPolicy(policy)
-        val controller = Autentificar(this)
-        controller.registrar("863166032574597", "Carlos_Tapia", "Car.2711")
+
+        //val controller = AutentificarController(this)
+        //controller.registrar("863166032574597", "Carlos_Tapia", "Car.2711")
     }
 
 
-    override fun recive(data: Any)
+    override fun send(data: Any)
     {
 
     }

@@ -1,13 +1,12 @@
 package cl.cariola.tsummary.business.controllers
 
 import android.content.Context
-import android.util.Log
 import cl.cariola.tsummary.AsyncResponse
 import cl.cariola.tsummary.business.entities.SesionLocal
 import cl.cariola.tsummary.data.ApiClient
 import cl.cariola.tsummary.data.DataBaseHandler
 
-class Autentificar(context: Context) : AsyncResponse  {
+class AutentificarController(context: Context) : AsyncResponse  {
 
     private val mContext : Context?
 
@@ -22,19 +21,22 @@ class Autentificar(context: Context) : AsyncResponse  {
         client.registrar(imei, userName, password)
     }
 
-    override fun recive(response: Any) {
-        if (response is SesionLocal)
+    override fun send(sesion: Any) {
+        if (sesion is SesionLocal)
         {
             var db = DataBaseHandler(this.mContext!!)
-            //val sesionDB = db.getById(response.usuario!!.id)
-            //db.insert(response)
+            db.insertSesionLocal(sesion)
+            val sesionDB = db.getById(sesion.usuario!!.id)
 
             val client = ApiClient()
             client.asyncResponse = this
-            //val clientes =  client.pullClientes(response)
-            val horas = client.pullHoras(response)
+
+            val proyectos =  client.getProyectos(sesion)
+            db.insertProyectos(proyectos!!)
+
+            val horas = client.getHoras(sesion)
+            db.insertHoras(horas!!)
         }
     }
-
 
 }

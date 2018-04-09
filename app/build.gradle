@@ -35,4 +35,5 @@ dependencies {
     //librerias externas
     implementation 'com.squareup.okhttp3:okhttp:3.10.0'
     implementation 'com.auth0.android:jwtdecode:1.1.1'
+    implementation 'com.android.support:recyclerview-v7:27.1.0'
 }
