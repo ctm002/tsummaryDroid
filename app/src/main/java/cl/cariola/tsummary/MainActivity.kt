@@ -1,29 +1,39 @@
 package cl.cariola.tsummary
 import android.content.Context
+import android.icu.text.SimpleDateFormat
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.StrictMode
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
+import android.text.Layout
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
-import android.widget.ListView
+import android.widget.LinearLayout
 import android.widget.TextView
-import cl.cariola.tsummary.business.controllers.AutentificarController
 import cl.cariola.tsummary.business.controllers.ProyectoController
 import cl.cariola.tsummary.business.entities.RegistroHora
-import java.util.*
+import java.util.Date
 
 class MainActivity : AppCompatActivity(), AsyncResponse {
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        val recyclerView = findViewById<ListView>(R.id.recycler_view_horas)
-
+        val recyclerView = findViewById<RecyclerView>(R.id.recycler_view_horas)
+        recyclerView.layoutManager = LinearLayoutManager(this)
         val proyectoController = ProyectoController(this)
-        val items = proyectoController.getListHorasByCodigoAndFecha(20, Date())
 
+
+        val dateFormat = java.text.SimpleDateFormat("yyyy-MM-dd")
+        val date = dateFormat.parse("2018-05-02")
+        val items = proyectoController.getListHorasByCodigoAndFecha(20, date)
+
+        val adapter = ListHorasAdapter(items)
+        recyclerView.adapter = adapter
 
 
         //listView.adapter = MyCustomAdapter(this)
@@ -42,39 +52,6 @@ class MainActivity : AppCompatActivity(), AsyncResponse {
     override fun send(data: Any)
     {
 
-    }
-
-    private class MyCustomAdapter(context: Context): BaseAdapter()
-    {
-        private val mContext: Context
-        private val mRegistroHoras = arrayListOf<RegistroHora>()
-
-        init
-        {
-            this.mContext = context
-        }
-
-        override fun getCount(): Int {
-            return 5
-        }
-
-        override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-            var layoutInflater = LayoutInflater.from(mContext)
-            val rowMain = layoutInflater.inflate(R.layout.row_main, parent, false)
-
-            val tVCliente = rowMain.findViewById<TextView>(R.id.clienteTV)
-            val TVProyecto = rowMain.findViewById<TextView>(R.id.proyectoTV)
-
-            return rowMain
-        }
-
-        override fun getItem(position: Int): Any {
-            return "Test de string"
-        }
-
-        override fun getItemId(position: Int): Long {
-            return position.toLong()
-        }
     }
 }
 

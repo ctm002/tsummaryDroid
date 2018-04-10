@@ -1,5 +1,4 @@
 package cl.cariola.tsummary.business.controllers
-
 import android.content.Context
 import cl.cariola.tsummary.business.entities.RegistroHora
 import cl.cariola.tsummary.data.DataBaseHandler
@@ -18,7 +17,7 @@ class ProyectoController(context: Context) {
     {
         var db = DataBaseHandler(this.mContext!!)
         val dateFormat = SimpleDateFormat("yyyy-MM-dd")
-        val strDate =   dateFormat.format(fecha)
+        val strDate =  dateFormat.format(fecha)
         return db.getListHorasByCodigoAndFecha(codigo, strDate)
     }
 }

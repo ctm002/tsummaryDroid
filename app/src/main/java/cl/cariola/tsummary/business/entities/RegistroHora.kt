@@ -18,7 +18,22 @@ class RegistroHora
     var mInicio: Hora = Hora(0, 0)
     var mFin: Hora = Hora(0,0 )
     var mFechaInsert: Date =  Date()
-
     var mProyectoId: Int = 0
     var mProyecto: Proyecto? = null
+    var mHoraTotal = Hora(0,0)
+
+    fun getNombreCliente() : String?
+    {
+        return this.mProyecto?.cliente?.nombre
+    }
+
+    fun getNombreProyecto() : String?
+    {
+        return this.mProyecto?.nombre
+    }
+
+    fun getHoraTotal(): String {
+        return "${ String.format("%02d",mHoraTotal.horas)}:${String.format("%02d",mHoraTotal.minutos)}"
+    }
+
 }

@@ -1,5 +1,4 @@
 package cl.cariola.tsummary.data
-
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
@@ -119,8 +118,8 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
             cv.put(TbHora.COL_TIM_CORREL, item.mCorrelativo)
             cv.put(TbHora.COL_PRO_ID, item.mProyectoId)
             cv.put(TbHora.COL_TIM_ASUNTO, item.mAsunto.replace("'", "\'").replace("\"", "'"))
-            cv.put(TbHora.COL_TIM_HORAS, item.mInicio.mHoras)
-            cv.put(TbHora.COL_TIM_MINUTOS, item.mInicio.mMinutos)
+            cv.put(TbHora.COL_TIM_HORAS, item.mHoraTotal.horas)
+            cv.put(TbHora.COL_TIM_MINUTOS, item.mHoraTotal.minutos)
             cv.put(TbHora.COL_ABO_ID, item.mAbogadoId)
             cv.put(TbHora.COL_MODIFICABLE, item.mModificable)
             cv.put(TbHora.COL_OFFLINE, item.mOffLine)
@@ -143,7 +142,7 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
                 "   h.${TbHora.COL_TIM_ASUNTO}," +
                 "   h.${TbHora.COL_TIM_HORAS}," +
                 "   h.${TbHora.COL_TIM_MINUTOS}," +
-                "   h.${TbHora.COL_ABO_ID}" +
+                "   h.${TbHora.COL_ABO_ID}," +
                 "   h.${TbHora.COL_MODIFICABLE}," +
                 "   h.${TbHora.COL_OFFLINE}," +
                 "   h.${TbHora.COL_FECHA_ING}," +
@@ -153,22 +152,27 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
                 "   h.${TbHora.COL_ESTADO}," +
                 "   h.${TbHora.COL_FECHA_HORA_INICIO}" +
                 "   FROM ${TbHora.TABlE_NAME} h INNER JOIN ${TbProyecto.TABlE_NAME} p " +
-                "       ON p.${TbProyecto.COL_ID} = h.${TbHora.COL_PRO_ID} " +
+                "       ON p.${TbProyecto.COL_ID}=h.${TbHora.COL_PRO_ID} " +
                 "   WHERE h.${TbHora.COL_ABO_ID}=$codigo " +
-                "   AND strftime('%Y-%m-%d', h.${TbHora.COL_FECHA_HORA_INICIO})=$fecha " +
-                "   ORDER BY h.${TbHora.COL_FECHA_HORA_INICIO}"
+                "   AND strftime('%Y-%m-%d', h.${TbHora.COL_FECHA_HORA_INICIO})='$fecha'" +
+                "   ORDER BY h.${TbHora.COL_FECHA_HORA_INICIO} ASC"
+
+
+        Log.d("SQL", query)
 
         val cursor = db.rawQuery(query, null)
         val items = ArrayList<RegistroHora>()
-        if (cursor.moveToFirst())
+        cursor.moveToFirst()
+        while (!cursor.isAfterLast)
         {
             val hora = RegistroHora()
             hora.mId = cursor.getInt(cursor.getColumnIndex(TbHora.COL_ID))
             hora.mCorrelativo  = cursor.getInt(cursor.getColumnIndex(TbHora.COL_TIM_CORREL))
             hora.mAsunto = cursor.getString(cursor.getColumnIndex(TbHora.COL_TIM_ASUNTO))
-            hora.mInicio = Hora(
+            hora.mHoraTotal = Hora(
                             cursor.getInt(cursor.getColumnIndex(TbHora.COL_TIM_HORAS)),
                             cursor.getInt(cursor.getColumnIndex(TbHora.COL_TIM_MINUTOS)))
+
             hora.mEstado = cursor.getInt(cursor.getColumnIndex(TbHora.COL_ESTADO))
             hora.mOffLine = (cursor.getInt(cursor.getColumnIndex(TbHora.COL_OFFLINE)) == 0)
             hora.mFechaHoraInicio = formatter.parse(cursor.getString(cursor.getColumnIndex(TbHora.COL_FECHA_HORA_INICIO)))
@@ -180,6 +184,7 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
                     cursor.getString(cursor.getColumnIndex(TbProyecto.COL_NOMBRE)),
                     cliente, 0)
             items.add(hora)
+            cursor.moveToNext()
         }
         db.close()
         return items
