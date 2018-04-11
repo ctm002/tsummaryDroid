@@ -19,7 +19,7 @@ class ListHorasAdapter(val items: List<RegistroHora>, context: Context) : Recycl
         return ViewHolderRegistroHoras(view).listen { pos, type ->
             val item = mItems.get(pos)
             Log.d("Selected items", "${item.mCorrelativo}")
-            val intent = Intent(this.mContext, RegistrarHorasActivity:: class.java)
+            val intent = Intent(this.mContext, RegistrarHoraActivity:: class.java)
             this.mContext.startActivity(intent)
         }
     }

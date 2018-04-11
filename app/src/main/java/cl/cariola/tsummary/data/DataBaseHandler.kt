@@ -6,7 +6,6 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 import cl.cariola.tsummary.business.entities.*
 import java.text.SimpleDateFormat
-import java.util.*
 import kotlin.collections.ArrayList
 
 val DATABASE_NAME = "tsummary.db"
@@ -47,7 +46,7 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
         return 1
     }
 
-    fun update(sesion: SesionLocal): Int
+    fun updateSesionLocal(sesion: SesionLocal): Int
     {
         val db = this.writableDatabase
         var cv = ContentValues()
@@ -56,7 +55,7 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
         return returnValue
     }
 
-    fun getById(id: Int): SesionLocal?
+    fun getSesionLocalById(id: Int): SesionLocal?
     {
         val db = this.readableDatabase
         val query = "SELECT * FROM ${TbUsuario.TABlE_NAME} WHERE ${TbUsuario.COL_ID}=$id"
@@ -127,10 +126,32 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
             cv.put(TbHora.COL_MODIFICABLE, item.mModificable)
             cv.put(TbHora.COL_OFFLINE, item.mOffLine)
             cv.put(TbHora.COL_FECHA_ING, dateFormat.format(item.mFechaInsert))
-            cv.put(TbHora.COL_ESTADO, item.mEstado)
+            cv.put(TbHora.COL_ESTADO, item.mEstado.value)
             cv.put(TbHora.COL_FECHA_HORA_INICIO, dateFormat.format(item.mFechaHoraInicio))
             db.insert(TbHora.TABlE_NAME, null, cv)
         }
+        db.close()
+        return true
+    }
+
+    fun insertHora(registro: RegistroHora): Boolean
+    {
+        val db = this.writableDatabase
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        var cv = ContentValues()
+        //cv.put(TbHora.COL_ID, registro.mId)
+        cv.put(TbHora.COL_TIM_CORREL, registro.mCorrelativo)
+        cv.put(TbHora.COL_PRO_ID, registro.mProyectoId)
+        cv.put(TbHora.COL_TIM_ASUNTO, registro.mAsunto.replace("'", "\'").replace("\"", "'"))
+        cv.put(TbHora.COL_TIM_HORAS, registro.mHoraTotal.horas)
+        cv.put(TbHora.COL_TIM_MINUTOS, registro.mHoraTotal.minutos)
+        cv.put(TbHora.COL_ABO_ID, registro.mAbogadoId)
+        cv.put(TbHora.COL_MODIFICABLE, registro.mModificable)
+        cv.put(TbHora.COL_OFFLINE, registro.mOffLine)
+        cv.put(TbHora.COL_FECHA_ING, dateFormat.format(registro.mFechaInsert))
+        cv.put(TbHora.COL_ESTADO, registro.mEstado.value)
+        cv.put(TbHora.COL_FECHA_HORA_INICIO, dateFormat.format(registro.mFechaHoraInicio))
+        db.insert(TbHora.TABlE_NAME, null, cv)
         db.close()
         return true
     }
@@ -176,7 +197,7 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
                             cursor.getInt(cursor.getColumnIndex(TbHora.COL_TIM_HORAS)),
                             cursor.getInt(cursor.getColumnIndex(TbHora.COL_TIM_MINUTOS)))
 
-            hora.mEstado = cursor.getInt(cursor.getColumnIndex(TbHora.COL_ESTADO))
+            hora.mEstado = Estados.from(cursor.getInt(cursor.getColumnIndex(TbHora.COL_ESTADO)))
             hora.mOffLine = (cursor.getInt(cursor.getColumnIndex(TbHora.COL_OFFLINE)) == 0)
             hora.mFechaHoraInicio = formatter.parse(cursor.getString(cursor.getColumnIndex(TbHora.COL_FECHA_HORA_INICIO)))
             hora.mFechaInsert = formatter.parse(cursor.getString(cursor.getColumnIndex(TbHora.COL_FECHA_ING)))
@@ -217,4 +238,41 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
         db.close()
         return proyectos
     }
+
+    fun getRegistroHoraById(id: Int) : RegistroHora?
+    {
+        val db = this.writableDatabase
+        val query = "SELECT * FROM ${TbHora.TABlE_NAME} WHERE ${TbHora.COL_ID}=$id"
+        val cursor = db.rawQuery(query, null)
+
+        var registro : RegistroHora? = null
+        if (!cursor.moveToFirst())
+        {
+            registro = RegistroHora()
+            registro.mCorrelativo = cursor.getInt(cursor.getColumnIndex(TbHora.COL_TIM_CORREL))
+            registro.mId = cursor.getInt(cursor.getColumnIndex(TbHora.COL_ID))
+            registro.mEstado = Estados.from(cursor.getInt(cursor.getColumnIndex(TbHora.COL_ESTADO)))
+        }
+        db.close()
+        return registro
+    }
+
+    fun deleteRegistro(registro: RegistroHora?)
+    {
+        val db = this.writableDatabase
+        var strFecha = SimpleDateFormat().format(registro?.mFechaUpdate).format("yyyy-MM-dd HH:mm:ss")
+        val query = "UPDATE ${TbHora.TABlE_NAME} " +
+                "   SET ${TbHora.COL_ESTADO}=${registro?.mEstado?.value}, ${TbHora.COL_FECHA_ULT_MOD}=$strFecha" +
+                "   WHERE ${TbHora.COL_ID}=${registro?.mId}"
+        db.execSQL(query)
+        db.close()
+    }
+
+    fun resetTables() {
+        val db = this.writableDatabase
+        val query = "DELETE FROM ${TbHora.TABlE_NAME}; DELETE FROM ${TbProyecto.TABlE_NAME}; DELETE FROM ${TbUsuario.TABlE_NAME} "
+        db.execSQL(query)
+        db.close()
+    }
+
 }

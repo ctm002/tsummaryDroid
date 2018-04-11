@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -56,7 +55,7 @@
         app:layout_constraintTop_toBottomOf="@+id/autoCompleteTextView" />
 
     <EditText
-        android:id="@+id/editText2"
+        android:id="@+id/editTxtNotas"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
@@ -72,7 +71,7 @@
     <TextView
         android:id="@+id/txtViewHorasTrabajadas"
         android:layout_width="0dp"
-        android:layout_height="19dp"
+        android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
@@ -85,10 +84,10 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editText2" />
+        app:layout_constraintTop_toBottomOf="@+id/editTxtNotas" />
 
     <EditText
-        android:id="@+id/editText4"
+        android:id="@+id/editTxtTrabHoras"
         android:layout_width="0dp"
         android:layout_height="49dp"
         android:layout_marginEnd="8dp"
@@ -97,12 +96,12 @@
         android:layout_marginStart="8dp"
         android:ems="10"
         android:inputType="number"
-        app:layout_constraintEnd_toStartOf="@+id/editText5"
+        app:layout_constraintEnd_toStartOf="@+id/editTxtTrabMinutos"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtViewHorasTrabajadas" />
 
     <EditText
-        android:id="@+id/editText5"
+        android:id="@+id/editTxtTrabMinutos"
         android:layout_width="0dp"
         android:layout_height="49dp"
         android:layout_marginEnd="8dp"
@@ -112,13 +111,13 @@
         android:ems="10"
         android:inputType="number"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/editText4"
+        app:layout_constraintStart_toEndOf="@+id/editTxtTrabHoras"
         app:layout_constraintTop_toBottomOf="@+id/txtViewHorasTrabajadas" />
 
     <TextView
         android:id="@+id/textView6"
         android:layout_width="0dp"
-        android:layout_height="19dp"
+        android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
@@ -130,10 +129,10 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editText4" />
+        app:layout_constraintTop_toBottomOf="@+id/editTxtTrabHoras" />
 
     <EditText
-        android:id="@+id/editText6"
+        android:id="@+id/editTxtInicioHoras"
         android:layout_width="0dp"
         android:layout_height="49dp"
         android:layout_marginEnd="8dp"
@@ -142,12 +141,12 @@
         android:layout_marginStart="8dp"
         android:ems="10"
         android:inputType="number"
-        app:layout_constraintEnd_toStartOf="@+id/editText7"
+        app:layout_constraintEnd_toStartOf="@+id/editTxtInicioMinutos"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView6" />
 
     <EditText
-        android:id="@+id/editText7"
+        android:id="@+id/editTxtInicioMinutos"
         android:layout_width="0dp"
         android:layout_height="49dp"
         android:layout_marginEnd="8dp"
@@ -157,35 +156,31 @@
         android:ems="10"
         android:inputType="numberSigned"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/editText6"
+        app:layout_constraintStart_toEndOf="@+id/editTxtInicioHoras"
         app:layout_constraintTop_toBottomOf="@+id/textView6" />
 
     <Button
-        android:id="@+id/btnEliminar"
+        android:id="@+id/btnResetData"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
         android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="Eliminar"
         app:layout_constraintEnd_toStartOf="@+id/btnGuardar"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editText6" />
+        app:layout_constraintTop_toBottomOf="@+id/editTxtInicioHoras" />
 
     <Button
         android:id="@+id/btnGuardar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
-        android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
-        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:text="Guardar"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/btnEliminar"
-        app:layout_constraintTop_toBottomOf="@+id/editText7" />
+        app:layout_constraintStart_toEndOf="@+id/btnResetData"
+        app:layout_constraintTop_toBottomOf="@+id/editTxtInicioMinutos" />
 
 </android.support.constraint.ConstraintLayout>

@@ -94,7 +94,8 @@ class ApiClient {
                 registro.mInicio = Hora(item.getInt("tim_horas"), item.getInt("tim_minutos"))
                 registro.mAsunto = item.getString("tim_asunto")
                 registro.mFechaInsert = format.parse(item.getString("tim_fecha_insert"))
-                registro.mEstado = if (item.getInt("nro_folio") > 0)  0 else 1
+                registro.mEstado = Estados.ANTIGUO
+                registro.mModificable = item.getInt("nro_folio") == 0
                 registro.mOffLine = false
                 registro.mAbogadoId = item.getInt("abo_id")
                 horas.add(registro)
