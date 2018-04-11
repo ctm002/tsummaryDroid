@@ -26,7 +26,7 @@ class AutentificarController(context: Context) : AsyncResponse  {
         {
             var db = DataBaseHandler(this.mContext!!)
             db.insertSesionLocal(sesion)
-            val sesionDB = db.getById(sesion.usuario!!.id)
+            //val sesionDB = db.getById(sesion.usuario!!.id)
 
             val client = ApiClient()
             client.asyncResponse = this

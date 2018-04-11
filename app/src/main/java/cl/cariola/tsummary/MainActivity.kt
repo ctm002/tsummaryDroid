@@ -1,21 +1,12 @@
 package cl.cariola.tsummary
-import android.content.Context
-import android.icu.text.SimpleDateFormat
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.StrictMode
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.text.Layout
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.BaseAdapter
-import android.widget.LinearLayout
-import android.widget.TextView
+import cl.cariola.tsummary.business.controllers.AutentificarController
 import cl.cariola.tsummary.business.controllers.ProyectoController
-import cl.cariola.tsummary.business.entities.RegistroHora
-import java.util.Date
+
 
 class MainActivity : AppCompatActivity(), AsyncResponse {
 
@@ -23,6 +14,8 @@ class MainActivity : AppCompatActivity(), AsyncResponse {
 
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        //loadData()
         val recyclerView = findViewById<RecyclerView>(R.id.recycler_view_horas)
         recyclerView.layoutManager = LinearLayoutManager(this)
         val proyectoController = ProyectoController(this)
@@ -32,26 +25,20 @@ class MainActivity : AppCompatActivity(), AsyncResponse {
         val date = dateFormat.parse("2018-05-02")
         val items = proyectoController.getListHorasByCodigoAndFecha(20, date)
 
-        val adapter = ListHorasAdapter(items)
+        val adapter = ListHorasAdapter(items, this)
         recyclerView.adapter = adapter
-
-
-        //listView.adapter = MyCustomAdapter(this)
-        //val client = ApiClient()
-        //client.asyncResponse = this
-        //client.registrar("863166032574597", "Carlos_Tapia", "Car.2711")
-
-        val policy =  StrictMode.ThreadPolicy.Builder().permitAll().build()
-        StrictMode.setThreadPolicy(policy)
-
-        //val controller = AutentificarController(this)
-        //controller.registrar("863166032574597", "Carlos_Tapia", "Car.2711")
     }
-
 
     override fun send(data: Any)
     {
 
+    }
+
+    fun loadData(){
+        val policy =  StrictMode.ThreadPolicy.Builder().permitAll().build()
+        StrictMode.setThreadPolicy(policy)
+        val autentificar = AutentificarController(this)
+        autentificar.registrar("863166032574597", "Carlos_Tapia", "Car.2711")
     }
 }
 

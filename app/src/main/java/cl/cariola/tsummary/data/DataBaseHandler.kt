@@ -7,6 +7,7 @@ import android.util.Log
 import cl.cariola.tsummary.business.entities.*
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.ArrayList
 
 val DATABASE_NAME = "tsummary.db"
 val DATABASE_VERSION = 1
@@ -93,11 +94,13 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
         for (item in proyectos)
         {
             val sql = """INSERT OR IGNORE INTO ${TbProyecto.TABlE_NAME}
-                (${TbProyecto.COL_ID}, ${TbProyecto.COL_NOMBRE}, ${TbProyecto.COL_CLI_NOM}, ${TbProyecto.COL_IDIOMA}, ${TbProyecto.COL_ESTADO})
+                (${TbProyecto.COL_ID}, ${TbProyecto.COL_NOMBRE}, ${TbProyecto.COL_CLI_COD}, ${TbProyecto.COL_CLI_NOM}, ${TbProyecto.COL_IDIOMA}, ${TbProyecto.COL_ESTADO})
                 VALUES(${item.id},
                 "${item.nombre.replace("'", "\'").replace("\"","'" ) }",
+                "${item.cliente.codigo}",
                 "${item.cliente.nombre.replace("'", "\'").replace("\"", "'") }",
-                "${item.cliente.idioma}", ${item.estado})  """.trimIndent()
+                "${item.cliente.idioma}",
+                ${item.estado})  """.trimIndent()
 
             Log.d("INSERT", sql)
             db.execSQL(sql)
@@ -178,7 +181,7 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
             hora.mFechaHoraInicio = formatter.parse(cursor.getString(cursor.getColumnIndex(TbHora.COL_FECHA_HORA_INICIO)))
             hora.mFechaInsert = formatter.parse(cursor.getString(cursor.getColumnIndex(TbHora.COL_FECHA_ING)))
 
-            val cliente = Cliente(cursor.getString(cursor.getColumnIndex(TbProyecto.COL_CLI_NOM)), 0, null, "")
+            val cliente = Cliente(0, cursor.getString(cursor.getColumnIndex(TbProyecto.COL_CLI_NOM)), null, "")
             hora.mProyecto  = Proyecto(
                     cursor.getInt(cursor.getColumnIndex(TbProyecto.COL_ID)),
                     cursor.getString(cursor.getColumnIndex(TbProyecto.COL_NOMBRE)),
@@ -188,5 +191,30 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
         }
         db.close()
         return items
+    }
+
+    fun getListProyectos(): List<Proyecto> {
+        val db = this.writableDatabase
+        val query = "SELECT * FROM ${TbProyecto.TABlE_NAME} "
+        val cursor = db.rawQuery(query, null)
+
+        var proyectos = ArrayList<Proyecto>()
+        cursor.moveToFirst()
+        while (!cursor.isAfterLast)
+        {
+            val id = cursor.getInt(cursor.getColumnIndex(TbProyecto.COL_ID))
+            val nombre = cursor.getString(cursor.getColumnIndex(TbProyecto.COL_NOMBRE))
+            val estado = cursor.getInt(cursor.getColumnIndex(TbProyecto.COL_ESTADO))
+
+            val idCliente = cursor.getInt(cursor.getColumnIndex(TbProyecto.COL_CLI_COD))
+            val nombreCliente = cursor.getString(cursor.getColumnIndex(TbProyecto.COL_CLI_NOM))
+            val idioma = cursor.getString(cursor.getColumnIndex(TbProyecto.COL_IDIOMA))
+            val cliente = Cliente(idCliente, nombreCliente, null, idioma)
+            val proyecto = Proyecto(id, nombre, cliente, estado)
+            proyectos.add(proyecto)
+            cursor.moveToNext()
+        }
+        db.close()
+        return proyectos
     }
 }

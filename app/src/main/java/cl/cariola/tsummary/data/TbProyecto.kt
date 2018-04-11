@@ -8,11 +8,13 @@ class TbProyecto {
         val COL_NOMBRE = "pro_nombre"
         val COL_IDIOMA = "pro_idioma"
         val COL_ESTADO = "estado"
+        val COL_CLI_COD = "cli_cod"
 
         val createTable = """
                 CREATE TABLE IF NOT EXISTS $TABlE_NAME(
                     $COL_ID INTEGER PRIMARY KEY,
                     $COL_NOMBRE VARCHAR(200),
+                    $COL_CLI_COD INTEGER,
                     $COL_CLI_NOM VARCHAR(200),
                     $COL_IDIOMA VARCHAR(10),
                     $COL_ESTADO INTEGER);

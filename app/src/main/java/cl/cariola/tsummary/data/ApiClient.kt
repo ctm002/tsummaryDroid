@@ -126,7 +126,7 @@ class ApiClient {
             for (index in 0..(clienteProyectos.length()-1))
             {
                 val item = clienteProyectos.getJSONObject(index)
-                val cliente = Cliente(item.getString("nombreCliente"), item.getInt("cli_cod"), null,  item.getString("idioma"))
+                val cliente = Cliente(item.getInt("cli_cod"), item.getString("nombreCliente"),null,  item.getString("idioma"))
                 val proyecto = Proyecto(item.getInt("pro_id"), item.getString("nombreProyecto"), cliente, item.getInt("estado"))
                 proyectos.add(proyecto)
                 Log.d("PROJECT", item.toString())

@@ -4,7 +4,6 @@ class TbUsuario {
 
     companion object
     {
-
         val TABlE_NAME = "Usuarios"
         val COL_NOMBRE = "Nombre"
         val COL_GRUPO = "Grupo"
