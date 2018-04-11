@@ -4,15 +4,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@android:color/holo_purple">
+    android:layout_height="wrap_content">
 
     <TextView
         android:id="@+id/tVCliente"
         android:layout_width="0dp"
         android:layout_height="24dp"
-
-        android:background="@android:color/holo_green_dark"
         android:textColor="@android:color/black"
         android:textSize="16sp"
         android:textStyle="bold"
@@ -25,8 +22,6 @@
         android:id="@+id/tVProyecto"
         android:layout_width="0dp"
         android:layout_height="24dp"
-
-        android:background="@android:color/holo_orange_light"
         app:layout_constraintEnd_toStartOf="@+id/guideline4"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tVCliente" />
@@ -35,7 +30,6 @@
         android:id="@+id/tVAsunto"
         android:layout_width="0dp"
         android:layout_height="24dp"
-        android:background="@android:color/holo_red_light"
         app:layout_constraintEnd_toStartOf="@+id/guideline4"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -45,8 +39,9 @@
         android:id="@+id/tVHora"
         android:layout_width="0dp"
         android:layout_height="48dp"
-        android:gravity="center_horizontal"
-        android:background="@android:color/holo_blue_light"
+        android:gravity="center_horizontal|center_vertical"
+        android:text="12:00"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/guideline4"
         app:layout_constraintTop_toTopOf="parent" />
@@ -66,7 +61,6 @@
         android:id="@+id/textView"
         android:layout_width="0dp"
         android:layout_height="24dp"
-        android:background="@android:color/darker_gray"
         app:layout_constraintEnd_toStartOf="@+id/guideline4"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tVAsunto" />

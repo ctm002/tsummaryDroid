@@ -6,6 +6,8 @@ import android.view.MenuItem
 import android.widget.*
 import cl.cariola.tsummary.business.controllers.ProyectoController
 import cl.cariola.tsummary.business.entities.Proyecto
+import cl.cariola.tsummary.business.entities.RegistroHora
+import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_registrar_hora.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -25,6 +27,11 @@ class RegistrarHoraActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_registrar_hora)
         actionBar?.setDisplayShowHomeEnabled(true)
+
+        val bundle = intent.extras
+        val regJSON = bundle!!.getString("registro")
+        val gson = Gson()
+        var registro = gson.fromJson(regJSON, RegistroHora:: class.java)
 
         setTitleBarTools()
         loadProjets()
