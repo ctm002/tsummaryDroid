@@ -13,7 +13,7 @@ import cl.cariola.tsummary.business.controllers.ProyectoController
 
 class RegistrarCuentaActivity: AppCompatActivity()
 {
-    lateinit var editTxtUserName : EditText
+    lateinit var editTxtLoginName : EditText
     lateinit var editTxtPassword : EditText
     lateinit var btnRegistrar : Button
     lateinit var btnResetData : Button
@@ -24,9 +24,9 @@ class RegistrarCuentaActivity: AppCompatActivity()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_registrar_cuenta)
 
-        editTxtUserName = findViewById(R.id.editTxtUserName)
+        editTxtLoginName = findViewById(R.id.editTxtUserName)
         editTxtPassword = findViewById(R.id.editTxtPassword)
-        editTxtUserName.setText("Carlos_Tapia")
+        editTxtLoginName.setText("Carlos_Tapia")
         editTxtPassword.setText("Car.2711")
 
         btnRegistrar = findViewById(R.id.btnRegistrar)
@@ -90,14 +90,14 @@ class RegistrarCuentaActivity: AppCompatActivity()
                 if (actions == Acciones.INITIAL)
                 {
                     val autentificar = AutentificarController(_context)
-                    autentificar.registrar("863166032574597", editTxtUserName.text.toString(), editTxtPassword.text.toString())
-                    return "PASS"
+                    autentificar.registrar("863166032574597", editTxtLoginName.text.toString(), editTxtPassword.text.toString())
+                    return "OK"
                 }
                 else if (actions == Acciones.ELIMINAR_TODO)
                 {
                     val controller = ProyectoController(_context)
                     controller.resetData()
-                    return "NO"
+                    return "ERROR"
                 }
                 return ""
             }

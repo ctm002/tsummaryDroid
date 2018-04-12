@@ -1,6 +1,7 @@
 package cl.cariola.tsummary.business.entities
 import java.util.Date
 
+
 class RegistroHora
 {
     var mCorrelativo: Int = 0
@@ -8,7 +9,7 @@ class RegistroHora
     var mAbogadoId: Int = 0
     var mModificable: Boolean = false
     var mOffLine: Boolean = false
-    var mFechaHoraInicio: Date = Date()
+    var mFechaHoraStart: Date = Date()
     var mId: Int  = 0
     var mEstado: Estados  = Estados.ANTIGUO
     var mInicio: Hora = Hora(0, 0)

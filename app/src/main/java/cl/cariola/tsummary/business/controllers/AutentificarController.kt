@@ -6,37 +6,47 @@ import cl.cariola.tsummary.business.entities.SesionLocal
 import cl.cariola.tsummary.data.ApiClient
 import cl.cariola.tsummary.data.DataBaseHandler
 
-class AutentificarController(context: Context) : AsyncResponse  {
+class AutentificarController(context: Context){
 
     private val mContext : Context?
+    lateinit var mClient: ApiClient
+    lateinit var mDB : DataBaseHandler
 
-    init {
+    init
+    {
         this.mContext = context
+        this.mDB = DataBaseHandler(this.mContext!!)
+        this.mClient = ApiClient()
+
     }
 
-    fun registrar(imei: String, userName: String, password: String){
-
-        val client = ApiClient()
-        client.asyncResponse = this
-        client.registrar(imei, userName, password)
-    }
-
-    override fun send(sesion: Any) {
-        if (sesion is SesionLocal)
+    fun registrar(imei: String, loginName: String, password: String)
+    {
+        var sesionLocal = this.mDB.getSesionLocalByIMEI(imei)
+        if (sesionLocal == null)
         {
-            var db = DataBaseHandler(this.mContext!!)
-            db.insertSesionLocal(sesion)
-            //val sesionDB = db.getSesionLocalById(sesion.usuario!!.id)
+            sesionLocal = this.mClient.register(imei, loginName, password)
+            this.mDB.insertSesionLocal(sesionLocal!!)
+            pull(sesionLocal)
+        }
+        else
+        {
+            if (sesionLocal.isExpired())
+            {
+                sesionLocal = this.mClient.getNewToken(imei)
+                this.mDB.updateSesionLocal(sesionLocal!!)
+            }
 
-            val client = ApiClient()
-            client.asyncResponse = this
-
-            val proyectos =  client.getProyectos(sesion)
-            db.insertProyectos(proyectos!!)
-
-            val horas = client.getHoras(sesion)
-            db.insertHoras(horas!!)
+            val registros = this.mDB.getListRegistroHoraByIdAndEstadoOffline(sesionLocal.getIdAbogado())
         }
     }
 
+    fun pull(sesionLocal: SesionLocal)
+    {
+        val proyectos= this.mClient.getListProjects(sesionLocal.token)
+        this.mDB.insertListProyectos(proyectos!!)
+
+        val horas =  this.mClient.getListHours(sesionLocal.getIdAbogado(), "2018-04-01", "2018-05-01", sesionLocal.token)
+        this.mDB.insertListRegistroHora(horas!!)
+    }
 }

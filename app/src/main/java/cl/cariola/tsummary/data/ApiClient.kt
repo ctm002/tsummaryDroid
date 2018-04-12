@@ -4,72 +4,84 @@ import cl.cariola.tsummary.AsyncResponse
 import org.json.JSONObject
 import java.net.URL
 import cl.cariola.tsummary.business.entities.*
-import com.auth0.android.jwt.JWT
+import com.google.gson.Gson
 import okhttp3.MediaType
 import org.json.JSONArray
 import java.text.SimpleDateFormat
 import javax.net.ssl.*
 
-class ApiClient {
+class ApiClient
+{
 
     val JSON: MediaType = okhttp3.MediaType.parse("application/json; charset=utf-8")!!
-    var asyncResponse: AsyncResponse? = null
     val host : String = "docroom.cariola.cl"
 
-    fun registrar(imei: String, userName: String, password: String)
+    fun register(imei: String, loginName: String, password: String): SesionLocal?
     {
 
-        var json = JSONObject()
-        json.put("imei",imei)
-        json.put("usuario", userName)
-        json.put("password",password)
-        val strJSON =  json.toString()
+        var JSONObjectRequest = JSONObject()
+        JSONObjectRequest.put("imei",imei)
+        JSONObjectRequest.put("usuario", loginName)
+        JSONObjectRequest.put("password",password)
+        val strJSON =  JSONObjectRequest.toString()
+        val postData: ByteArray = strJSON.toByteArray(Charsets.UTF_8)
 
         var httpClient = getHttpClient("tokenmobile", "POST", true)
-        val postData: ByteArray = strJSON.toByteArray(Charsets.UTF_8)
         httpClient.setRequestProperty("Content-Length", postData.size.toString())
         httpClient.outputStream.write(postData)
-
         try
         {
             val buffer = httpClient.inputStream.bufferedReader(Charsets.UTF_8)
             val strResponse = buffer.readText()
-            val jsonObject = JSONObject(strResponse)
-            val token = jsonObject.getString("token")
-            val estado = jsonObject.getInt("estado")
+            val JSONObjectResponse = JSONObject(strResponse)
+            val token = JSONObjectResponse.getString("token")
+            val estado = JSONObjectResponse.getInt("estado")
             if (estado == 1) {
-
-                val jwt = JWT(token)
-                val loginName = jwt.getClaim("LoginName").asString()
-                val expiresAt = jwt.expiresAt!!
-                val cuenta = Cuenta(loginName!!, password, imei)
-
-                val id : Int = jwt.getClaim("AboId").asInt()!!
-                val nombre : String = jwt.getClaim("Nombre").asString()!!
-                val perfil : String = jwt.getClaim("Perfil").asString()!!
-                val grupo : String = jwt.getClaim("Grupo").asString()!!
-                val email : String = jwt.getClaim("Email").asString()!!
-                val idUsuario : Int = jwt.getClaim("IdUsuario").asInt()!!
-                val usuario = Usuario(id, nombre, perfil, grupo, email, idUsuario, cuenta)
-                Log.d("INFO", "${nombre}->${perfil}->${grupo}->${email}->${id}")
-                var sesionLocal = SesionLocal(usuario, token, expiresAt)
-                asyncResponse?.send(sesionLocal)
+                val sesionLocal = SesionLocal(token, imei)
             }
         }
         catch (e: Exception){}
+        return null
     }
 
-    fun getHoras(sesionLocal: SesionLocal): List<RegistroHora>?
+    fun getNewToken(imei: String): SesionLocal?
     {
-        var JSONObject = JSONObject()
-                .put("FechaI", "20180415")
-                .put("FechaF", "20180515")
+        var JSONObjectRequest = JSONObject()
+        JSONObjectRequest.put("imei",imei)
+        val strJSON =  JSONObjectRequest.toString()
+        val postData: ByteArray = strJSON.toByteArray(Charsets.UTF_8)
+
+        var httpClient = getHttpClient("tokenIMEI", "POST", true)
+        httpClient.setRequestProperty("Content-Length", postData.size.toString())
+        httpClient.outputStream.write(postData)
+        try
+        {
+            val buffer = httpClient.inputStream.bufferedReader(Charsets.UTF_8)
+            val strResponse = buffer.readText()
+            val JSONObjectResponse = JSONObject(strResponse)
+            val token = JSONObjectResponse.getString("token")
+            val estado = JSONObjectResponse.getInt("estado")
+            if (estado == 1) {
+                val sesionLocal = SesionLocal(token, imei)
+                return sesionLocal
+            }
+
+        }
+        catch (e: Exception){}
+        return null
+    }
+
+    fun getListHours(idAbogado: Int, dateStart: String, dateEnd: String, token: String): List<RegistroHora>?
+    {
+        var JSONObjectRequest = JSONObject()
+                .put("FechaI", dateStart)
+                .put("FechaF", dateEnd)
                 .put("tim_correl", 0)
-                .put("AboId", 20)
-        val strJSON = JSONObject.toString()
+                .put("AboId", idAbogado)
+        val strJSON = JSONObjectRequest.toString()
 
         var httpClient = getHttpClient("api/Horas/GethorasByParameters", "POST", true)
-        httpClient.setRequestProperty("Authorization", "bearer ${sesionLocal.token}")
+        httpClient.setRequestProperty("Authorization", "bearer ${token}")
         val postData: ByteArray = strJSON.toByteArray(Charsets.UTF_8)
         httpClient.setRequestProperty("Content-Length", postData.size.toString())
         httpClient.outputStream.write(postData)
@@ -80,9 +92,8 @@ class ApiClient {
             var horas = ArrayList<RegistroHora>()
 
             val buffer = httpClient.inputStream.bufferedReader(Charsets.UTF_8)
-            val strResponse = buffer.readText()
-            val objJSON = JSONObject(strResponse)
-            var registros= objJSON.get("data") as JSONArray
+            val JSONObjectResponse = JSONObject(buffer.readText())
+            var registros= JSONObjectResponse.get("data") as JSONArray
 
             for (index in 0..(registros.length()-1))
             {
@@ -90,7 +101,7 @@ class ApiClient {
                 val registro = RegistroHora()
                 registro.mCorrelativo = item.getInt("tim_correl")
                 registro.mProyectoId = item.getInt("pro_id")
-                registro.mFechaHoraInicio = format.parse(item.getString("fechaInicio"))
+                registro.mFechaHoraStart = format.parse(item.getString("fechaInicio"))
                 registro.mInicio = Hora(item.getInt("tim_horas"), item.getInt("tim_minutos"))
                 registro.mAsunto = item.getString("tim_asunto")
                 registro.mFechaInsert = format.parse(item.getString("tim_fecha_insert"))
@@ -108,11 +119,11 @@ class ApiClient {
         return null
     }
 
-    fun getProyectos(sesionLocal: SesionLocal) : List<Proyecto>?
+    fun getListProjects(token: String) : List<Proyecto>?
     {
         var httpClient = getHttpClient("api/ClienteProyecto/getUltimosProyectoByAbogadoMob", "POST", true)
-        httpClient.setRequestProperty("Authorization", "bearer ${sesionLocal.token}")
-        val strJSON = "{\"abo_id\": 20, \"cantidad\":0}"
+        httpClient.setRequestProperty("Authorization", "bearer ${token}")
+        val strJSON = "{\"abo_id\": 0, \"cantidad\":0}" //Para todos los abogados se retorna la misma cantidad de proyectos
         val postData: ByteArray = strJSON.toByteArray(Charsets.UTF_8)
         httpClient.setRequestProperty("Content-Length", postData.size.toString())
         httpClient.outputStream.write(postData)
@@ -152,6 +163,68 @@ class ApiClient {
         httpClient.setRequestProperty("User-Agent", "OkHttp")
         httpClient.setRequestProperty("Host", "$host")
         return httpClient
+    }
+
+    fun save(registro: RegistroHora, token: String)
+    {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        var JSONObjectRequest = JSONObject()
+        JSONObjectRequest.put("tim_correl", registro.mCorrelativo)
+        JSONObjectRequest.put("pro_id", registro.mProyectoId)
+        JSONObjectRequest.put("tim_fecha_ing",  dateFormat.format(registro.mFechaHoraStart))
+        JSONObjectRequest.put("tim_asunto", registro.mAsunto)
+        JSONObjectRequest.put("tim_horas", registro.mHoraTotal.horas)
+        JSONObjectRequest.put("tim_minutos", registro.mHoraTotal.minutos)
+        JSONObjectRequest.put("abo_id", registro.mAbogadoId)
+        JSONObjectRequest.put("OffLine", registro.mOffLine)
+        JSONObjectRequest.put("FechaInsert", dateFormat.format(registro.mFechaInsert))
+        JSONObjectRequest.put("Estado", registro.mEstado.value)
+        val strJSONRequest =  JSONObjectRequest.toString()
+
+        val postData: ByteArray = strJSONRequest.toByteArray(Charsets.UTF_8)
+        var httpClient = getHttpClient("api/HorasMobile", "POST",true)
+        httpClient.setRequestProperty("Content-Length", postData.size.toString())
+        httpClient.setRequestProperty("Authorization", "bearer ${token}" )
+        httpClient.outputStream.write(postData)
+        var buffer = httpClient.inputStream.bufferedReader(Charsets.UTF_8)
+        val objJSONResponse = JSONObject(buffer.readText())
+        if  (objJSONResponse.get("data") != null)
+        {
+            val data = objJSONResponse.get("data") as JSONObject
+            registro.mCorrelativo = data.getInt("tim_correl")
+        }
+    }
+
+    fun delete(registro: RegistroHora, token: String)
+    {
+        var httpClient = getHttpClient("api/Horas/${registro.mCorrelativo}" , "DELETE", true)
+        httpClient.setRequestProperty("Authorization", "bearer ${token}")
+        var buffer = httpClient.inputStream.bufferedReader(Charsets.UTF_8)
+        val JSONObjectResponse = JSONObject(buffer.readText())
+        if (JSONObjectResponse.getInt("estado") == 1)
+        {
+
+        }
+    }
+
+    fun pushHours(data: DataSend, token: String)
+    {
+        val gson = Gson()
+        val strJSON = gson.toJson(data)
+        val postData: ByteArray = strJSON.toByteArray(Charsets.UTF_8)
+
+        var httpClient = getHttpClient("api/HorasMobile/Sincronizar", "POST", true)
+        httpClient.setRequestProperty("Content-Length", postData.size.toString())
+        httpClient.setRequestProperty("Authorization", "bearer ${token}")
+        httpClient.outputStream.write(postData)
+        try
+        {
+            val buffer = httpClient.inputStream.bufferedReader(Charsets.UTF_8)
+            val strResponse = buffer.readText()
+            val JSONObjectResponse = JSONObject(strResponse)
+            print(JSONObjectResponse.toString())
+        }
+        catch (e: Exception){}
     }
 
 }

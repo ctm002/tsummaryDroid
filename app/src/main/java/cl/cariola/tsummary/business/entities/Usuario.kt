@@ -7,5 +7,5 @@ data class Usuario (
     var grupo: String,
     var email: String,
     var idUsuario: Int,
-    var cuenta: Cuenta
+    var cuenta: Cuenta?
 )

@@ -29,7 +29,7 @@ class SchedulerActivity : AppCompatActivity(), AsyncResponse {
         this.recyclerView.layoutManager = LinearLayoutManager(this)
 
         val dateFormat = SimpleDateFormat("yyyy-MM-dd")
-        this.startDate = dateFormat.parse("2018-05-02")
+        this.startDate = dateFormat.parse("2018-05-03")
         loadItems()
 
 
@@ -51,8 +51,6 @@ class SchedulerActivity : AppCompatActivity(), AsyncResponse {
 
     private fun loadItems() {
         val proyectoController = ProyectoController(this)
-        //val dateFormat = SimpleDateFormat("yyyy-MM-dd")
-        //val date = dateFormat.parse("2018-05-02")
         val items = proyectoController.getListHorasByCodigoAndFecha(20, startDate)
         val adapter = ListHorasAdapter(items, this)
         this.recyclerView.adapter = adapter
