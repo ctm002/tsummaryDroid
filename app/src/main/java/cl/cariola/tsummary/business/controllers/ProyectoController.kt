@@ -3,19 +3,18 @@ import android.content.Context
 import cl.cariola.tsummary.business.entities.*
 import cl.cariola.tsummary.data.ApiClient
 import cl.cariola.tsummary.data.DataBaseHandler
-import cl.cariola.tsummary.data.DataSend
-import cl.cariola.tsummary.data.HoraTS
 import java.text.SimpleDateFormat
 import java.util.*
 
 class ProyectoController(context: Context) {
 
     private val mContext: Context?
-    lateinit var mClient: ApiClient
+    lateinit var mSincronizador: Sincronizador
     lateinit var mDB: DataBaseHandler
 
     init {
         this.mContext = context
+        this.mSincronizador = Sincronizador(this.mContext)
         this.mDB = DataBaseHandler(this.mContext)
     }
 
@@ -93,57 +92,34 @@ class ProyectoController(context: Context) {
         this.mDB.resetTables()
     }
 
+    /*
     fun sincronizar(imei: String, startDate: String, endDate: String) {
         var sesionLocal = this.mDB.getSesionLocalByIMEI(imei)!!
         if (!sesionLocal.isExpired())
         {
-            val id = sesionLocal.getId()
+            val idAbogado = sesionLocal.getIdAbogado()
             val idUsuario = sesionLocal.getIdUsuario()
+            val token = sesionLocal.token
 
-            val registros = this.mDB.getListRegistroHoraByIdAndEstadoOffline(id)
+            val registros = this.mDB.getListRegistroHoraByIdAbogadoAndEstadoOffline(idAbogado)
             if (registros != null)
             {
 
                 if (registros != null)
                 {
-
-                    val registrosTS = registros.map { it ->
-                        val dateFormat = SimpleDateFormat("yyyy-MM-dd")
-                        HoraTS(it.mCorrelativo, it.mProyectoId,
-                                dateFormat.format(it.mFechaHoraStart), it.mAsunto,
-                                it.mHoraTotal.horas, it.mHoraTotal.minutos,
-                                it.mAbogadoId, it.mOffLine,
-                                dateFormat.format(it.mFechaInsert),
-                                it.mEstado.value)
-                    }
-
-                    val dataSend = DataSend(SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(Date()), registrosTS)
-                    this.mClient.pushHours(dataSend, sesionLocal.token)
-
-                    pullData(id, startDate, endDate, sesionLocal.token)
-
+                    this.mSincronizador.push(registros, token)
+                    this.mSincronizador.pull(idAbogado, startDate, endDate, token)
                 }
                 else
                 {
-                    pullData(id, startDate, endDate, sesionLocal.token)
+                    this.mSincronizador.pull(idAbogado, startDate, endDate, token)
                 }
             }
             else
             {
-                pullData(id, startDate, endDate, sesionLocal.token)
+                this.mSincronizador.pull(idAbogado, startDate, endDate, token)
             }
         }
     }
-
-    fun pullData(id: Int, startDate: String, endDate: String, token: String)
-    {
-        this.mDB.deleteListProyectos()
-        this.mDB.deleteListRegistroHora()
-
-        val newRegistros = this.mClient.getListHours(id, startDate, endDate, token)
-        this.mDB.insertListRegistroHora(newRegistros!!)
-
-        val newProyectos = this.mClient.getListProjects(token)
-        this.mDB.insertListProyectos(newProyectos!!)
-    }
+    */
 }

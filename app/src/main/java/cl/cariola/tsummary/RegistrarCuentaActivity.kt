@@ -10,6 +10,8 @@ import android.widget.Button
 import android.widget.EditText
 import cl.cariola.tsummary.business.controllers.AutentificarController
 import cl.cariola.tsummary.business.controllers.ProyectoController
+import cl.cariola.tsummary.business.controllers.Sincronizador
+import com.google.gson.annotations.Since
 
 class RegistrarCuentaActivity: AppCompatActivity()
 {
@@ -90,8 +92,14 @@ class RegistrarCuentaActivity: AppCompatActivity()
                 if (actions == Acciones.INITIAL)
                 {
                     val autentificar = AutentificarController(_context)
-                    autentificar.registrar("863166032574597", editTxtLoginName.text.toString(), editTxtPassword.text.toString())
+
+
+
+                    val sesionLocal = autentificar.register("863166032574597", editTxtLoginName.text.toString(), editTxtPassword.text.toString())
+                    val sincronizador = Sincronizador(_context)
+                    sincronizador.pull(sesionLocal!!.getIdAbogado(), "", "", sesionLocal!!.token)
                     return "OK"
+
                 }
                 else if (actions == Acciones.ELIMINAR_TODO)
                 {

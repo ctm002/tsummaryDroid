@@ -228,7 +228,7 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
         return items
     }
 
-    fun getListRegistroHoraByIdAndEstadoOffline(codigo: Int): List<RegistroHora>?
+    fun getListRegistroHoraByIdAbogadoAndEstadoOffline(codigo: Int): List<RegistroHora>?
     {
         val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 
