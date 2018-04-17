@@ -34,6 +34,6 @@ class TbHora
                     $COL_ESTADO INTEGER,
                     $COL_FECHA_ULT_MOD VARCHAR(20),
                     $COL_FECHA_HORA_INICIO VARCHAR(20));
-                    """
+                """
     }
 }

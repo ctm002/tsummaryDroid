@@ -14,7 +14,7 @@ class ProyectoController(context: Context) {
 
     init {
         this.mContext = context
-        this.mSincronizador = Sincronizador(this.mContext)
+        this.mSincronizador = Sincronizador.getInstance(this.mContext)
         this.mDB = DataBaseHandler(this.mContext)
     }
 
@@ -35,6 +35,7 @@ class ProyectoController(context: Context) {
         } else {
             registro = RegistroHora()
             registro.mId = id
+            registro.mCorrelativo = correlativo
         }
 
         registro.mAbogadoId = abogadoId
@@ -62,8 +63,7 @@ class ProyectoController(context: Context) {
 
         val sesionLocal = this.mDB.getSesionLocalById(abogadoId)!!
         if (!sesionLocal.isExpired()) {
-            val apiClient = ApiClient()
-            apiClient.save(registro, sesionLocal.token)
+            ApiClient.save(registro, sesionLocal.authToken)
             registro.mEstado = Estados.ANTIGUO
             this.mDB.updateRegistroHora(registro)
         }
@@ -78,10 +78,7 @@ class ProyectoController(context: Context) {
                 registro.mOffLine = true
                 registro.mEstado = Estados.ELIMINADO
                 registro.mFechaUpdate = Date()
-
-                val apiClient = ApiClient()
-                apiClient.delete(registro, sesionLocal.token)
-
+                ApiClient.delete(registro, sesionLocal.authToken)
                 registro.mEstado = Estados.ANTIGUO
                 this.mDB.deleteRegistro(registro)
             }
@@ -92,34 +89,4 @@ class ProyectoController(context: Context) {
         this.mDB.resetTables()
     }
 
-    /*
-    fun sincronizar(imei: String, startDate: String, endDate: String) {
-        var sesionLocal = this.mDB.getSesionLocalByIMEI(imei)!!
-        if (!sesionLocal.isExpired())
-        {
-            val idAbogado = sesionLocal.getIdAbogado()
-            val idUsuario = sesionLocal.getIdUsuario()
-            val token = sesionLocal.token
-
-            val registros = this.mDB.getListRegistroHoraByIdAbogadoAndEstadoOffline(idAbogado)
-            if (registros != null)
-            {
-
-                if (registros != null)
-                {
-                    this.mSincronizador.push(registros, token)
-                    this.mSincronizador.pull(idAbogado, startDate, endDate, token)
-                }
-                else
-                {
-                    this.mSincronizador.pull(idAbogado, startDate, endDate, token)
-                }
-            }
-            else
-            {
-                this.mSincronizador.pull(idAbogado, startDate, endDate, token)
-            }
-        }
-    }
-    */
 }

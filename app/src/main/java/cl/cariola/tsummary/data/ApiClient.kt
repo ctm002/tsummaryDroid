@@ -1,6 +1,5 @@
 package cl.cariola.tsummary.data
 import android.util.Log
-import cl.cariola.tsummary.AsyncResponse
 import org.json.JSONObject
 import java.net.URL
 import cl.cariola.tsummary.business.entities.*
@@ -10,11 +9,10 @@ import org.json.JSONArray
 import java.text.SimpleDateFormat
 import javax.net.ssl.*
 
-class ApiClient
+object ApiClient
 {
-
-    val JSON: MediaType = okhttp3.MediaType.parse("application/json; charset=utf-8")!!
-    val host : String = "docroom.cariola.cl"
+    private val JSON: MediaType = okhttp3.MediaType.parse("application/json; charset=utf-8")!!
+    private val host : String = "docroom.cariola.cl"
 
     fun register(imei: String, loginName: String, password: String): SesionLocal?
     {
@@ -38,6 +36,7 @@ class ApiClient
             val estado = JSONObjectResponse.getInt("estado")
             if (estado == 1) {
                 val sesionLocal = SesionLocal(token, imei)
+                return sesionLocal
             }
         }
         catch (e: Exception){}
@@ -59,7 +58,7 @@ class ApiClient
             val buffer = httpClient.inputStream.bufferedReader(Charsets.UTF_8)
             val strResponse = buffer.readText()
             val JSONObjectResponse = JSONObject(strResponse)
-            val token = JSONObjectResponse.getString("token")
+            val token = JSONObjectResponse.getString("authToken")
             val estado = JSONObjectResponse.getInt("estado")
             if (estado == 1) {
                 val sesionLocal = SesionLocal(token, imei)
@@ -98,17 +97,7 @@ class ApiClient
             for (index in 0..(registros.length()-1))
             {
                 val item = registros.getJSONObject(index)
-                val registro = RegistroHora()
-                registro.mCorrelativo = item.getInt("tim_correl")
-                registro.mProyectoId = item.getInt("pro_id")
-                registro.mFechaHoraStart = format.parse(item.getString("fechaInicio"))
-                registro.mInicio = Hora(item.getInt("tim_horas"), item.getInt("tim_minutos"))
-                registro.mAsunto = item.getString("tim_asunto")
-                registro.mFechaInsert = format.parse(item.getString("tim_fecha_insert"))
-                registro.mEstado = Estados.ANTIGUO
-                registro.mModificable = item.getInt("nro_folio") == 0
-                registro.mOffLine = false
-                registro.mAbogadoId = item.getInt("abo_id")
+                val registro =  RegistroHoraParser.parse(item)
                 horas.add(registro)
                 //Log.d("HOUR", item.toString())
             }
@@ -151,7 +140,7 @@ class ApiClient
         return null
     }
 
-    fun getHttpClient( strURL: String, method: String, doOutput: Boolean) : HttpsURLConnection
+    private fun getHttpClient( strURL: String, method: String, doOutput: Boolean) : HttpsURLConnection
     {
         var url = URL("https://$host/$strURL")
         val httpClient =  url.openConnection() as HttpsURLConnection
@@ -226,5 +215,6 @@ class ApiClient
         }
         catch (e: Exception){}
     }
+
 
 }

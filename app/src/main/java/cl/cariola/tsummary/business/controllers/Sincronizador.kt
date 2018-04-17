@@ -9,24 +9,37 @@ import cl.cariola.tsummary.data.DataSend
 import cl.cariola.tsummary.data.HoraTS
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.atomic.AtomicBoolean
 
-class Sincronizador(val _context: Context)
+class Sincronizador private  constructor(_context: Context)
 {
+    private lateinit var mContext : Context
+    private lateinit var mDB : DataBaseHandler
 
-    companion object {
-        lateinit var mContext : Context
-        lateinit var mClient: ApiClient
-        lateinit var mDB : DataBaseHandler
+
+    companion object
+    {
+        lateinit var INSTANCE : Sincronizador
+        private val initialized = AtomicBoolean()
+
+        fun getInstance(_context: Context): Sincronizador
+        {
+            if (!initialized.getAndSet(true))
+            {
+                INSTANCE = Sincronizador(_context)
+            }
+            return INSTANCE
+        }
     }
 
     init
     {
         mContext = _context
         mDB = DataBaseHandler(mContext!!)
-        mClient = ApiClient()
+
     }
 
-    public fun prepareSend(registros: List<RegistroHora>): DataSend {
+    private fun prepareSend(registros: List<RegistroHora>): DataSend {
         val registrosTS = registros.map { it ->
             val dateFormat = SimpleDateFormat("yyyy-MM-dd")
             HoraTS(it.mCorrelativo, it.mProyectoId,
@@ -40,18 +53,20 @@ class Sincronizador(val _context: Context)
         return dataSend
     }
 
-
     fun pull(_idAbogado: Int, _startDate: String, _endDate: String, _token: String)
     {
-        val proyectos= mClient.getListProjects(_token)
+        val proyectos= ApiClient.getListProjects(_token)
         mDB.insertListProyectos(proyectos!!)
 
-        val horas= mClient.getListHours(_idAbogado, "2018-04-01", "2018-05-01", _token)
+        val horas= ApiClient.getListHours(_idAbogado, "2018-04-01", "2018-05-01", _token)
         mDB.insertListRegistroHora(horas!!)
     }
 
-    fun push(_registros: List<RegistroHora>, _token: String) {
+    fun push(_registros: List<RegistroHora>, _token: String)
+    {
         val dataSend = prepareSend(_registros)
-        mClient.pushHours(dataSend, _token)
+        ApiClient.pushHours(dataSend, _token)
     }
+
+
 }

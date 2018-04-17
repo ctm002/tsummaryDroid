@@ -10,13 +10,13 @@ class AutentificarController(context: Context){
     private val mContext : Context?
     lateinit var mClient: ApiClient
     lateinit var mDB : DataBaseHandler
+    lateinit var mSincronizador: Sincronizador
 
     init
     {
         this.mContext = context
         this.mDB = DataBaseHandler(this.mContext!!)
-        this.mClient = ApiClient()
-
+        this.mSincronizador = Sincronizador.getInstance(this.mContext)
     }
 
     fun register(imei: String, loginName: String, password: String): SesionLocal?
@@ -24,14 +24,17 @@ class AutentificarController(context: Context){
         var sesionLocal = this.mDB.getSesionLocalByIMEI(imei)
         if (sesionLocal == null)
         {
-            sesionLocal = this.mClient.register(imei, loginName, password)
-            this.mDB.insertSesionLocal(sesionLocal!!)
+            sesionLocal = ApiClient.register(imei, loginName, password)
+            if (sesionLocal != null)
+            {
+                this.mDB.insertSesionLocal(sesionLocal)
+            }
         }
         else
         {
             if (sesionLocal.isExpired())
             {
-                sesionLocal = this.mClient.getNewToken(imei)
+                sesionLocal = ApiClient.getNewToken(imei)
                 this.mDB.updateSesionLocal(sesionLocal!!)
             }
         }

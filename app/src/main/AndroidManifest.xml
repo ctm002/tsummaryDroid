@@ -3,6 +3,13 @@
     package="cl.cariola.tsummary">
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"></uses-permission>
+    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS"></uses-permission>
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS"></uses-permission>
+    <uses-permission android:name="android.permission.READ_SYNC_STATS"/>
+    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS"></uses-permission>
+    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
 
     <application
         android:allowBackup="true"
@@ -22,5 +29,27 @@
 
         <activity android:name=".RegistrarHoraActivity" android:parentActivityName=".SchedulerActivity"></activity>
         <activity android:name=".SchedulerActivity" android:parentActivityName=".RegistrarCuentaActivity"></activity>
+
+        <provider
+            android:authorities="cl.cariola.tsummary"
+            android:name=".provider.RegistroHoraProvider" android:exported="true">
+        </provider>
+
+        <service android:name=".SyncService" android:exported="true">
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter"></action>
+            </intent-filter>
+            <meta-data android:name="android.content.SyncAdapter"
+                android:resource="@xml/syncadapter" />
+        </service>
+
+        <service android:name=".accounts.GenericAccountService">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+
+            <meta-data android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
     </application>
 </manifest>

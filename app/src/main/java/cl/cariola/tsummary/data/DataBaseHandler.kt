@@ -29,7 +29,7 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
         val sql =
                 """
                 INSERT OR IGNORE INTO ${TbUsuario.TABlE_NAME} (${TbUsuario.COL_IMEI}, ${TbUsuario.COL_TOKEN})
-                VALUES ('${sesion.getIMEI()}', '${sesion.token}')
+                VALUES ('${sesion.getIMEI()}', '${sesion.authToken}')
             """.trimIndent()
         db.execSQL(sql)
         db.close()
