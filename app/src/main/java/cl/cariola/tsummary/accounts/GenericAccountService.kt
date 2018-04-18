@@ -69,35 +69,33 @@ class GenericAccountService: Service() {
         override fun getAuthToken(response: AccountAuthenticatorResponse?, account: Account?, authTokenType: String?, options: Bundle?): Bundle {
 
             Log.v(TAG, "getAuthToken()")
-            // If the caller requested an authToken type we don't support, then
-            // return an error
             if (!authTokenType.equals(Constants.AUTHTOKEN_TYPE)) {
                 val result = Bundle()
                 result.putString(AccountManager.KEY_ERROR_MESSAGE, "invalid authTokenType")
                 return result
             }
-            // Extract the username and password from the Account Manager, and ask
-            // the server for an appropriate AuthToken.
+
             val am = AccountManager.get(this.mContext)
             val imei =  am.getUserData(account, "IMEI")
             var authToken =  am.peekAuthToken(account, authTokenType)  // am.getUserData(account, "AUTHTOKEN")
             val sesionLocal = SesionLocal(authToken, imei)
 
             val password = am.getPassword(account)
-            if (password != null && imei != null && sesionLocal.isExpired()) {
+            if (password != null && imei != null && (sesionLocal == null || sesionLocal.isExpired())) {
                 authToken = ApiClient.register(imei ,account?.name!!, password)?.authToken
                 if (!TextUtils.isEmpty(authToken)) {
+                    am.setAuthToken(account, authTokenType, authToken)
                     val result = Bundle()
+                    result.putString("IMEI", imei)
                     result.putString(AccountManager.KEY_ACCOUNT_NAME, account?.name)
                     result.putString(AccountManager.KEY_ACCOUNT_TYPE, SyncStateContract.Constants.ACCOUNT_TYPE)
                     result.putString(AccountManager.KEY_AUTHTOKEN, authToken)
                     return result
                 }
             }
-            am.setAuthToken(account, authTokenType, imei)
+            am.setAuthToken(account, authTokenType, authToken)
             val bundle = Bundle()
             bundle.putString("IMEI", imei)
-            bundle.putString("AUTHTOKEN", authToken)
             return bundle
         }
 

@@ -9,7 +9,7 @@ class RegistroHora
     var mAbogadoId: Int = 0
     var mModificable: Boolean = false
     var mOffLine: Boolean = false
-    var mFechaHoraStart: Date = Date()
+    var mFechaIng: Date = Date()
     var mId: Int  = 0
     var mEstado: Estados  = Estados.ANTIGUO
     var mInicio: Hora = Hora(0, 0)

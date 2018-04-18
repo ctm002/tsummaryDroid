@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 import cl.cariola.tsummary.business.entities.*
+import cl.cariola.tsummary.provider.RegistroHoraContract
 import java.text.SimpleDateFormat
 import kotlin.collections.ArrayList
 
@@ -16,7 +17,7 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
 
     override fun onCreate(db: SQLiteDatabase?) {
         db?.execSQL(TbUsuario.createTable)
-        db?.execSQL(TbProyecto.createTable)
+        db?.execSQL(RegistroHoraContract.Proyecto.CREATE_TABLE)
         db?.execSQL(TbHora.createTable)
     }
 
@@ -118,7 +119,7 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
             values.put(TbHora.COL_OFFLINE, item.mOffLine)
             values.put(TbHora.COL_FECHA_ING, dateFormat.format(item.mFechaInsert))
             values.put(TbHora.COL_ESTADO, item.mEstado.value)
-            values.put(TbHora.COL_FECHA_HORA_INICIO, dateFormat.format(item.mFechaHoraStart))
+            values.put(TbHora.COL_FECHA_HORA_INICIO, dateFormat.format(item.mFechaIng))
             db.insert(TbHora.TABlE_NAME, null, values)
         }
         db.close()
@@ -141,7 +142,7 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
 
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
         values.put(TbHora.COL_FECHA_ULT_MOD, dateFormat.format(registro.mFechaUpdate))
-        values.put(TbHora.COL_FECHA_HORA_INICIO, dateFormat.format(registro.mFechaHoraStart))
+        values.put(TbHora.COL_FECHA_HORA_INICIO, dateFormat.format(registro.mFechaIng))
 
         val args = arrayOf<String>(registro.mId.toString())
         db.update(TbHora.TABlE_NAME, values, "${TbHora.COL_ID}=?", args)
@@ -165,7 +166,7 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
         values.put(TbHora.COL_ESTADO, registro.mEstado.value)
         values.put(TbHora.COL_FECHA_ING, dateFormat.format(registro.mFechaInsert))
         values.put(TbHora.COL_FECHA_ULT_MOD, dateFormat.format(registro.mFechaUpdate))
-        values.put(TbHora.COL_FECHA_HORA_INICIO, dateFormat.format(registro.mFechaHoraStart))
+        values.put(TbHora.COL_FECHA_HORA_INICIO, dateFormat.format(registro.mFechaIng))
         db.insert(TbHora.TABlE_NAME, null, values)
         db.close()
         return true
@@ -213,7 +214,7 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
 
             hora.mEstado = Estados.from(cursor.getInt(cursor.getColumnIndex(TbHora.COL_ESTADO)))
             hora.mOffLine = (cursor.getInt(cursor.getColumnIndex(TbHora.COL_OFFLINE)) == 0)
-            hora.mFechaHoraStart = formatter.parse(cursor.getString(cursor.getColumnIndex(TbHora.COL_FECHA_HORA_INICIO)))
+            hora.mFechaIng = formatter.parse(cursor.getString(cursor.getColumnIndex(TbHora.COL_FECHA_HORA_INICIO)))
             hora.mFechaInsert = formatter.parse(cursor.getString(cursor.getColumnIndex(TbHora.COL_FECHA_ING)))
 
             val cliente = Cliente(0, cursor.getString(cursor.getColumnIndex(TbProyecto.COL_CLI_NOM)), null, "")
@@ -268,7 +269,7 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
 
             hora.mEstado = Estados.from(cursor.getInt(cursor.getColumnIndex(TbHora.COL_ESTADO)))
             hora.mOffLine = (cursor.getInt(cursor.getColumnIndex(TbHora.COL_OFFLINE)) == 0)
-            hora.mFechaHoraStart = formatter.parse(cursor.getString(cursor.getColumnIndex(TbHora.COL_FECHA_HORA_INICIO)))
+            hora.mFechaIng = formatter.parse(cursor.getString(cursor.getColumnIndex(TbHora.COL_FECHA_HORA_INICIO)))
             hora.mFechaInsert = formatter.parse(cursor.getString(cursor.getColumnIndex(TbHora.COL_FECHA_ING)))
 
             val cliente = Cliente(0, cursor.getString(cursor.getColumnIndex(TbProyecto.COL_CLI_NOM)), null, "")

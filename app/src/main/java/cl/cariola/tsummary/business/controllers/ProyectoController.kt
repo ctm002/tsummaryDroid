@@ -48,7 +48,7 @@ class ProyectoController(context: Context) {
         val dtFecha = sFormat.parse(startDate)
         dtFecha.hours = startHours
         dtFecha.minutes = startMinutes
-        registro.mFechaHoraStart = dtFecha
+        registro.mFechaIng = dtFecha
 
         if (registro.mId == 0) {
             registro.mFechaInsert = Date()

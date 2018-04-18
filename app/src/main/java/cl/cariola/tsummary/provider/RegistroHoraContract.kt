@@ -6,18 +6,49 @@ import android.content.ContentResolver
 
 object RegistroHoraContract {
 
-    val AUTHORITY = "cl.cariola.tsummary"
-    val BASE_CONTENT_URI = Uri.parse("content://$AUTHORITY")
-    private val PATH_ENTRIES = "entries"
+    val AUTHORITY = "cl.cariola.tsummary.provider.RegistroHoraProvider"
+    val BASE_CONTENT_URI_1 = Uri.parse("content://$AUTHORITY")
+    val BASE_CONTENT_URI_2 = Uri.parse("content://$AUTHORITY")
+    private val PATH_HORAS = "horas"
+    private val PATH_PROYECTOS = "proyectos"
 
-
-    internal  class Entry : BaseColumns {
+    internal  class Proyecto : BaseColumns {
 
         companion object {
 
-            val CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE + "/vnd.basicsyncadapter.entries"
-            val CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/vnd.basicsyncadapter.entry"
-            val CONTENT_URI = BASE_CONTENT_URI.buildUpon().appendPath(PATH_ENTRIES).build()
+            val CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE + "/proyectos"
+            val CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/proyectos"
+            val CONTENT_URI = BASE_CONTENT_URI_2.buildUpon().appendPath(PATH_PROYECTOS).build()
+
+            val TABlE_NAME = "Proyectos"
+            val COL_ID = "pro_id"
+            val COL_NOMBRE = "pro_nombre"
+            val COL_CLI_COD = "cli_cod"
+            val COL_CLI_NOM = "cli_nom"
+            val COL_ESTADO = "estado"
+            val COL_IDIOMA = "pro_idioma"
+            val COL_FECHA_ULT_MOD = "fecha_ult_mod"
+
+            val CREATE_TABLE = """
+                CREATE TABLE IF NOT EXISTS $TABlE_NAME(
+                    $COL_ID INTEGER PRIMARY KEY,
+                    $COL_NOMBRE VARCHAR(200),
+                    $COL_CLI_COD INTEGER,
+                    $COL_CLI_NOM VARCHAR(200),
+                    $COL_IDIOMA VARCHAR(10),
+                    $COL_ESTADO INTEGER,
+                    $COL_FECHA_ULT_MOD VARCHAR(20))
+                """
+        }
+    }
+
+    internal  class RegistroHora : BaseColumns {
+
+        companion object {
+
+            val CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE + "/horas"
+            val CONTENT_ITEM_TYPE = ContentResolver.CURSOR_ITEM_BASE_TYPE + "/horas"
+            val CONTENT_URI = BASE_CONTENT_URI_1.buildUpon().appendPath(PATH_HORAS).build()
 
             val TABlE_NAME = "Horas"
             val COL_ID =  "hora_id"
@@ -32,6 +63,7 @@ object RegistroHoraContract {
             val COL_FECHA_ING =  "tim_fecha_ing"
             val COL_ESTADO = "estado"
             val COL_FECHA_ULT_MOD = "fecha_ult_mod"
+            val COL_FECHA_INSERT = "fecha_ult_mod"
             val COL_FECHA_HORA_INICIO = "fecha_hora_inicio"
 
             val CREATE_TABLE = """
@@ -52,5 +84,6 @@ object RegistroHoraContract {
                 """
         }
     }
+
 }
 

@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="cl.cariola.tsummary">
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"></uses-permission>
-    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS"></uses-permission>
-    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS"></uses-permission>
-    <uses-permission android:name="android.permission.READ_SYNC_STATS"/>
-    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS"></uses-permission>
-    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.READ_SYNC_STATS" />
+    <uses-permission android:name="android.permission.MANAGE_ACCOUNTS" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.USE_CREDENTIALS" />
 
     <application
@@ -19,36 +20,44 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <activity android:name=".RegistrarCuentaActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".RegistrarHoraActivity" android:parentActivityName=".SchedulerActivity"></activity>
-        <activity android:name=".SchedulerActivity" android:parentActivityName=".RegistrarCuentaActivity"></activity>
+        <activity
+            android:name=".RegistrarHoraActivity"
+            android:parentActivityName=".SchedulerActivity" />
+        <activity
+            android:name=".SchedulerActivity"
+            android:parentActivityName=".RegistrarCuentaActivity" />
 
         <provider
-            android:authorities="cl.cariola.tsummary"
-            android:name=".provider.RegistroHoraProvider" android:exported="true">
-        </provider>
+            android:name=".provider.RegistroHoraProvider"
+            android:authorities="cl.cariola.tsummary.provider.RegistroHoraProvider"
+            android:enabled="true"
+            android:exported="true"></provider>
 
-        <service android:name=".SyncService" android:exported="true">
+        <service
+            android:name=".SyncService"
+            android:exported="true">
             <intent-filter>
-                <action android:name="android.content.SyncAdapter"></action>
+                <action android:name="android.content.SyncAdapter" />
             </intent-filter>
-            <meta-data android:name="android.content.SyncAdapter"
+
+            <meta-data
+                android:name="android.content.SyncAdapter"
                 android:resource="@xml/syncadapter" />
         </service>
-
         <service android:name=".accounts.GenericAccountService">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />
             </intent-filter>
 
-            <meta-data android:name="android.accounts.AccountAuthenticator"
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
                 android:resource="@xml/authenticator" />
         </service>
     </application>

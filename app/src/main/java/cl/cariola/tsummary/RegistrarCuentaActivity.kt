@@ -130,7 +130,7 @@ class RegistrarCuentaActivity: AccountAuthenticatorActivity()
         intent.putExtra(AccountManager.KEY_AUTHTOKEN, authToken)
         setAccountAuthenticatorResult(intent.extras)
         setResult(Activity.RESULT_OK, intent)
-        finish()
+        //finish()
     }
 
     fun onAuthenticationResult(authToken: String?) {

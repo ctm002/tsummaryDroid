@@ -104,7 +104,44 @@ object ApiClient
             buffer.close()
             return horas
         }
-        catch (exception: Exception) { throw Exception("Error en la recuperación de los proyectos $exception.message") }
+        catch (exception: Exception) { throw Exception("Error en la recuperación de los horas $exception.message") }
+        return null
+    }
+
+    fun getListHoursV2(idAbogado: Int, dateStart: String, dateEnd: String, token: String): MutableMap<String, RegistroHora>?
+    {
+        var JSONObjectRequest = JSONObject()
+                .put("FechaI", dateStart)
+                .put("FechaF", dateEnd)
+                .put("tim_correl", 0)
+                .put("AboId", idAbogado)
+        val strJSON = JSONObjectRequest.toString()
+
+        var httpClient = getHttpClient("api/Horas/GetHorasByParameters", "POST", true)
+        httpClient.setRequestProperty("Authorization", "bearer ${token}")
+        val postData: ByteArray = strJSON.toByteArray(Charsets.UTF_8)
+        httpClient.setRequestProperty("Content-Length", postData.size.toString())
+        httpClient.outputStream.write(postData)
+
+        try
+        {
+            val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+            var horas = mutableMapOf<String, RegistroHora>()
+            val buffer = httpClient.inputStream.bufferedReader(Charsets.UTF_8)
+            val JSONObjectResponse = JSONObject(buffer.readText())
+            var registros= JSONObjectResponse.get("data") as JSONArray
+
+            for (index in 0..(registros.length()-1))
+            {
+                val item = registros.getJSONObject(index)
+                val registro =  RegistroHoraParser.parse(item)
+                horas.put(registro.mCorrelativo.toString(), registro)
+            }
+
+            buffer.close()
+            return horas
+        }
+        catch (exception: Exception) { throw Exception("Error en la recuperación de los horas $exception.message") }
         return null
     }
 
@@ -140,6 +177,38 @@ object ApiClient
         return null
     }
 
+    fun getListProjectsV2(token: String) : MutableMap<String, Proyecto>?
+    {
+        var httpClient = getHttpClient("api/ClienteProyecto/getUltimosProyectoByAbogadoMob", "POST", true)
+        httpClient.setRequestProperty("Authorization", "bearer ${token}")
+        val strJSON = "{\"abo_id\": 0, \"cantidad\":0}" //Para todos los abogados se retorna la misma cantidad de proyectos
+        val postData: ByteArray = strJSON.toByteArray(Charsets.UTF_8)
+        httpClient.setRequestProperty("Content-Length", postData.size.toString())
+        httpClient.outputStream.write(postData)
+
+        try
+        {
+            var proyectos = mutableMapOf<String, Proyecto>()
+            val buffer = httpClient.inputStream.bufferedReader(Charsets.UTF_8)
+            val strResponse = buffer.readText()
+            val objJSON = JSONObject(strResponse)
+            var clienteProyectos= objJSON.get("data") as JSONArray
+            for (index in 0..(clienteProyectos.length()-1))
+            {
+                val item = clienteProyectos.getJSONObject(index)
+                val cliente = Cliente(item.getInt("cli_cod"), item.getString("nombreCliente"),null,  item.getString("idioma"))
+                val proyecto = Proyecto(item.getInt("pro_id"), item.getString("nombreProyecto"), cliente, item.getInt("estado"))
+                proyectos.put(proyecto.id.toString(), proyecto)
+                Log.d("PROJECT", item.toString())
+            }
+            return proyectos
+            buffer.close()
+        }
+        catch (exception: Exception) { throw Exception("Error en la recuperación de los proyectos $exception.message") }
+
+        return null
+    }
+
     private fun getHttpClient( strURL: String, method: String, doOutput: Boolean) : HttpsURLConnection
     {
         var url = URL("https://$host/$strURL")
@@ -160,7 +229,7 @@ object ApiClient
         var JSONObjectRequest = JSONObject()
         JSONObjectRequest.put("tim_correl", registro.mCorrelativo)
         JSONObjectRequest.put("pro_id", registro.mProyectoId)
-        JSONObjectRequest.put("tim_fecha_ing",  dateFormat.format(registro.mFechaHoraStart))
+        JSONObjectRequest.put("tim_fecha_ing",  dateFormat.format(registro.mFechaIng))
         JSONObjectRequest.put("tim_asunto", registro.mAsunto)
         JSONObjectRequest.put("tim_horas", registro.mHoraTotal.horas)
         JSONObjectRequest.put("tim_minutos", registro.mHoraTotal.minutos)
@@ -215,6 +284,5 @@ object ApiClient
         }
         catch (e: Exception){}
     }
-
 
 }

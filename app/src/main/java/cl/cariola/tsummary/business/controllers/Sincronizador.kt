@@ -2,7 +2,6 @@ package cl.cariola.tsummary.business.controllers
 
 import android.content.Context
 import cl.cariola.tsummary.business.entities.RegistroHora
-import cl.cariola.tsummary.business.entities.SesionLocal
 import cl.cariola.tsummary.data.ApiClient
 import cl.cariola.tsummary.data.DataBaseHandler
 import cl.cariola.tsummary.data.DataSend
@@ -43,7 +42,7 @@ class Sincronizador private  constructor(_context: Context)
         val registrosTS = registros.map { it ->
             val dateFormat = SimpleDateFormat("yyyy-MM-dd")
             HoraTS(it.mCorrelativo, it.mProyectoId,
-                    dateFormat.format(it.mFechaHoraStart), it.mAsunto,
+                    dateFormat.format(it.mFechaIng), it.mAsunto,
                     it.mHoraTotal.horas, it.mHoraTotal.minutos,
                     it.mAbogadoId, it.mOffLine,
                     dateFormat.format(it.mFechaInsert),
