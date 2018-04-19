@@ -40,6 +40,7 @@ class RegistrarCuentaActivity: AccountAuthenticatorActivity()
     var mUsername: String?  = null
     var mPassword: String? = null
     var mIMEI: String? = null
+    internal  var task: RegistrarCuentaTask? = null
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -79,18 +80,18 @@ class RegistrarCuentaActivity: AccountAuthenticatorActivity()
 
         Constants.ACCOUNT_NAME = mUsername!!
 
-        var task = RegistrarCuenta()
-        task.messages ="Descargando datos..."
-        task.actions = Acciones.INITIAL
-        task.execute()
+        this.task = RegistrarCuentaTask()
+        task?.messages = "Descargando datos..."
+        task?.actions = Acciones.INITIAL
+        task?.execute()
+
     }
 
-    fun resetData()
-    {
-        var task = RegistrarCuenta()
-        task.messages ="Eliminando datos..."
-        task.actions = Acciones.ELIMINAR_TODO
-        task.execute()
+    fun resetData() {
+        this.task = RegistrarCuentaTask()
+        this.task?.messages = "Eliminando datos..."
+        this.task?.actions = Acciones.ELIMINAR_TODO
+        this.task?.execute()
     }
 
     enum class Acciones(val value : Int)
@@ -103,27 +104,33 @@ class RegistrarCuentaActivity: AccountAuthenticatorActivity()
         }
     }
 
-
     private fun finishLogin(authToken: String)
     {
         val account = Account(mUsername, Constants.ACCOUNT_TYPE)
+        var accounts = mAccountManager.accounts.filter { it.type == Constants.ACCOUNT_TYPE}
+        for (acc in accounts)
+        {
+            if (acc.name == mUsername)
+            {
+                mRequestNewAccount = false
+                break
+            }
+        }
+
+        mAccountManager.setAuthToken(account, AccountManager.KEY_AUTHTOKEN, authToken)
+        mAccountManager.setUserData(account, Constants.IMEI_SMARTPHONE, this.mIMEI)
+        mAccountManager.setUserData(account, Constants.AUTH_TOKEN, authToken)
+        mAccountManager.setPassword(account, mPassword)
+
         if (mRequestNewAccount)
         {
-
             val data = Bundle()
-            data.putString("IMEI", this.mIMEI)
-            //data.putString("AUTHTOKEN", authToken)
-            mAccountManager.setAuthToken(account, Constants.AUTHTOKEN_TYPE, authToken)
+            data.putString(Constants.IMEI_SMARTPHONE, this.mIMEI)
             mAccountManager.addAccountExplicitly(account, mPassword, data)
-
-            // Set contacts sync for this account.
             ContentResolver.setIsSyncable(account, RegistroHoraContract.AUTHORITY, 1)
             ContentResolver.setSyncAutomatically(account, RegistroHoraContract.AUTHORITY, true)
         }
-        else
-        {
-            mAccountManager.setPassword(account, mPassword)
-        }
+
         val intent = Intent()
         intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, mUsername)
         intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, Constants.ACCOUNT_TYPE)
@@ -137,7 +144,7 @@ class RegistrarCuentaActivity: AccountAuthenticatorActivity()
         val success = authToken != null && authToken.length > 0
         Log.i(TAG, "onAuthenticationResult($success)")
         // Our task is complete, so clear it out
-        //mAuthTask = null
+        task = null
         // Hide the progress dialog
         //hideProgress()
         if (success)
@@ -154,9 +161,9 @@ class RegistrarCuentaActivity: AccountAuthenticatorActivity()
 
         }
     }
-    internal inner class RegistrarCuenta(): AsyncTask<Void, Void, String>()
-    {
 
+    inner class RegistrarCuentaTask(): AsyncTask<Void, Void, String>()
+    {
         lateinit var actions : Acciones
         lateinit var messages : String
         lateinit var progressDialog: ProgressDialog
@@ -176,8 +183,15 @@ class RegistrarCuentaActivity: AccountAuthenticatorActivity()
                 {
                     val autentificar = AutentificarController(_context)
                     val sesionLocal = autentificar.register(mIMEI!!, mUsername!!, mPassword!!)
-                    onAuthenticationResult(sesionLocal?.authToken)
-                    return "OK"
+                    if (sesionLocal?.authToken != "")
+                    {
+                        onAuthenticationResult(sesionLocal?.authToken)
+                        return "OK"
+                    }
+                    else
+                    {
+                        return "FAIL"
+                    }
                 }
                 else if (actions == Acciones.ELIMINAR_TODO)
                 {

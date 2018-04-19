@@ -69,15 +69,16 @@ class GenericAccountService: Service() {
         override fun getAuthToken(response: AccountAuthenticatorResponse?, account: Account?, authTokenType: String?, options: Bundle?): Bundle {
 
             Log.v(TAG, "getAuthToken()")
-            if (!authTokenType.equals(Constants.AUTHTOKEN_TYPE)) {
+            if (!authTokenType.equals(Constants.AUTH_TOKEN_TYPE)) {
                 val result = Bundle()
                 result.putString(AccountManager.KEY_ERROR_MESSAGE, "invalid authTokenType")
                 return result
             }
 
             val am = AccountManager.get(this.mContext)
-            val imei =  am.getUserData(account, "IMEI")
-            var authToken =  am.peekAuthToken(account, authTokenType)  // am.getUserData(account, "AUTHTOKEN")
+            val imei =  am.getUserData(account, Constants.IMEI_SMARTPHONE)
+            //var authToken =  am.peekAuthToken(account, authTokenType)  // am.getUserData(account, "AUTHTOKEN")
+            var authToken =  am.getUserData(account, Constants.AUTH_TOKEN)  // am.getUserData(account, "AUTHTOKEN")
             val sesionLocal = SesionLocal(authToken, imei)
 
             val password = am.getPassword(account)
@@ -86,17 +87,23 @@ class GenericAccountService: Service() {
                 if (!TextUtils.isEmpty(authToken)) {
                     am.setAuthToken(account, authTokenType, authToken)
                     val result = Bundle()
-                    result.putString("IMEI", imei)
+                    result.putString( Constants.IMEI_SMARTPHONE, imei)
                     result.putString(AccountManager.KEY_ACCOUNT_NAME, account?.name)
-                    result.putString(AccountManager.KEY_ACCOUNT_TYPE, SyncStateContract.Constants.ACCOUNT_TYPE)
+                    result.putString(AccountManager.KEY_ACCOUNT_TYPE, Constants.ACCOUNT_TYPE)
                     result.putString(AccountManager.KEY_AUTHTOKEN, authToken)
                     return result
                 }
             }
-            am.setAuthToken(account, authTokenType, authToken)
-            val bundle = Bundle()
-            bundle.putString("IMEI", imei)
-            return bundle
+
+            var intent = Intent(this.mContext, RegistrarCuentaActivity::class.java)
+            intent.putExtra(AccountManager.KEY_ACCOUNT_MANAGER_RESPONSE, response)
+            intent.putExtra(Constants.ACCOUNT_TYPE, account?.type)
+            intent.putExtra(Constants.AUTH_TOKEN_TYPE, authTokenType)
+            intent.putExtra(Constants.IMEI_SMARTPHONE, imei)
+
+            val reBundle = Bundle()
+            reBundle.putParcelable(AccountManager.KEY_INTENT, intent)
+            return reBundle
         }
 
         override fun hasFeatures(response: AccountAuthenticatorResponse?, account: Account?, features: Array<out String>?): Bundle {

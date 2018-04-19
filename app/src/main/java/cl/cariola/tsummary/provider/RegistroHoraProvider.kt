@@ -20,9 +20,9 @@ class RegistroHoraProvider: ContentProvider() {
     val ROUTE_PROYECTOS_ID = 4
 
     private val sUriMatcher = UriMatcher(UriMatcher.NO_MATCH)
-    init {
-
-        sUriMatcher. addURI(AUTHORITY, "horas", 1)
+    init
+    {
+        sUriMatcher.addURI(AUTHORITY, "horas", 1)
         sUriMatcher.addURI(AUTHORITY, "horas/#", 2)
         sUriMatcher.addURI(AUTHORITY, "proyectos/", 3)
         sUriMatcher.addURI(AUTHORITY, "proyectos/#", 4)
@@ -39,7 +39,8 @@ class RegistroHoraProvider: ContentProvider() {
     override fun getType(uri:Uri):String
     {
         val match = sUriMatcher.match(uri)
-        when (match) {
+        when (match)
+        {
             ROUTE_HORAS -> return RegistroHoraContract.RegistroHora.CONTENT_TYPE
             ROUTE_HORAS_ID -> return RegistroHoraContract.RegistroHora.CONTENT_ITEM_TYPE
             ROUTE_PROYECTOS -> return RegistroHoraContract.Proyecto.CONTENT_ITEM_TYPE
@@ -233,7 +234,6 @@ class RegistroHoraProvider: ContentProvider() {
         override fun onCreate(db:SQLiteDatabase) {
             db.execSQL(SQL_CREATE_TB_HORAS)
             db.execSQL(SQL_CREATE_TB_PROYECTOS)
-
         }
 
         override fun onUpgrade(db:SQLiteDatabase, oldVersion:Int, newVersion:Int) {

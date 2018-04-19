@@ -52,7 +52,7 @@ class SyncAdapter: AbstractThreadedSyncAdapter
     {
         Log.w(TAG, "Starting synchronization...")
         try {
-            val authToken= this.mAccountManager.blockingGetAuthToken(account, Constants.AUTHTOKEN_TYPE, true);
+            val authToken= this.mAccountManager.getUserData(account, Constants.AUTH_TOKEN);
             if (authToken != null)
             {
                 //syncNewsRegistroHora(authToken)

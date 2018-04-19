@@ -7,7 +7,6 @@ import android.util.Log
 import cl.cariola.tsummary.business.entities.*
 import cl.cariola.tsummary.provider.RegistroHoraContract
 import java.text.SimpleDateFormat
-import kotlin.collections.ArrayList
 
 
 val DATABASE_NAME = "tsummary.db"
