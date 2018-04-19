@@ -22,10 +22,10 @@ class TSummaryProvider: ContentProvider() {
     private val sUriMatcher = UriMatcher(UriMatcher.NO_MATCH)
     init
     {
-        sUriMatcher.addURI(AUTHORITY, "horas", 1)
-        sUriMatcher.addURI(AUTHORITY, "horas/#", 2)
-        sUriMatcher.addURI(AUTHORITY, "proyectos/", 3)
-        sUriMatcher.addURI(AUTHORITY, "proyectos/#", 4)
+        sUriMatcher.addURI(AUTHORITY, "Horas", 1)
+        sUriMatcher.addURI(AUTHORITY, "Hora/#", 2)
+        sUriMatcher.addURI(AUTHORITY, "Proyectos", 3)
+        sUriMatcher.addURI(AUTHORITY, "Proyecto/#", 4)
     }
 
     lateinit private var mDataBaseHelper: DatabaseClient
@@ -49,8 +49,7 @@ class TSummaryProvider: ContentProvider() {
         }
     }
 
-    override fun query(uri:Uri, projection:Array<String>, selection:String, selectionArgs:Array<String>,
-        sortOrder:String):Cursor
+    override fun query(uri:Uri, projection:Array<String>, selection:String, selectionArgs:Array<String>, sortOrder:String):Cursor
     {
         val db = mDataBaseHelper.readableDatabase
         val builder = SelectionBuilder()

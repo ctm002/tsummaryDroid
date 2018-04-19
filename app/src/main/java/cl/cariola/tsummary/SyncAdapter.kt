@@ -54,7 +54,7 @@ class SyncAdapter: AbstractThreadedSyncAdapter
         var batch = ArrayList<ContentProviderOperation>()
         val listRegistroHoras = ApiClient.getListHoursV2(20, "2018-04-01", "2018-05-01", authToken)
         if (listRegistroHoras != null) {
-            var c = this.mContentResolver.query(TSummaryContract.RegistroHora.CONTENT_URI, TSummaryContract.RegistroHora.PROJECTION_REGISTRO_HORA, "1 = ?", arrayOf<String>("1"), "")
+            var c = this.mContentResolver.query(TSummaryContract.RegistroHora.CONTENT_URI, TSummaryContract.RegistroHora.PROJECTION_REGISTRO_HORA, "1=?", arrayOf<String>("1"), "")
             assert(c != null)
             c.moveToFirst()
             while (!c.isAfterLast) {
@@ -123,7 +123,7 @@ class SyncAdapter: AbstractThreadedSyncAdapter
         if (lstProyectos != null)
         {
 
-            var c = this.mContentResolver.query(TSummaryContract.Proyecto.CONTENT_URI, TSummaryContract.Proyecto.PROJECTION_PROYECTO, "1=?",  arrayOf<String>("1"), "")
+            var c = this.mContentResolver.query(TSummaryContract.Proyecto.CONTENT_URI, TSummaryContract.Proyecto.PROJECTION_PROYECTO, "1=?",  arrayOf<String>(""), "")
             assert( c != null)
             c.moveToFirst()
             while(!c.isAfterLast){

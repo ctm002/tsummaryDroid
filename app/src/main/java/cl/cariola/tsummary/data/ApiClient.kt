@@ -199,7 +199,7 @@ object ApiClient
                 val cliente = Cliente(item.getInt("cli_cod"), item.getString("nombreCliente"),null,  item.getString("idioma"))
                 val proyecto = Proyecto(item.getInt("pro_id"), item.getString("nombreProyecto"), cliente, item.getInt("estado"))
                 proyectos.put(proyecto.id.toString(), proyecto)
-                Log.d("PROJECT", item.toString())
+                //Log.d("PROJECT", item.toString())
             }
             return proyectos
             buffer.close()
