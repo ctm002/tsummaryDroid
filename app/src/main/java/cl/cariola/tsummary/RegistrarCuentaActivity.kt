@@ -1,6 +1,5 @@
 package cl.cariola.tsummary
 
-import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
 import android.os.AsyncTask
@@ -13,18 +12,29 @@ import android.accounts.AccountManager
 import android.content.ContentResolver
 import android.accounts.Account
 import android.accounts.AccountAuthenticatorActivity
-import android.app.Activity
 import android.util.Log
-import cl.cariola.tsummary.provider.RegistroHoraContract
+import android.view.View
+import android.widget.ProgressBar
+import cl.cariola.tsummary.provider.TSummaryContract
 
+enum class Acciones(val value : Int)
+{
+    ELIMINAR_TODO(0),
+    INITIAL(1);
+
+    companion object {
+        fun from(findValue: Int): Acciones = Acciones.values().first { it.value == findValue }
+    }
+}
 
 class RegistrarCuentaActivity: AccountAuthenticatorActivity()
 {
+
     lateinit var editTxtLoginName : EditText
     lateinit var editTxtPassword : EditText
     lateinit var btnRegistrar : Button
     lateinit var btnResetData : Button
-    lateinit var _context: Context
+    lateinit var mContext: Context
 
     /** The tag used to log to adb console.  */
 
@@ -40,7 +50,8 @@ class RegistrarCuentaActivity: AccountAuthenticatorActivity()
     var mUsername: String?  = null
     var mPassword: String? = null
     var mIMEI: String? = null
-    internal  var task: RegistrarCuentaTask? = null
+    var task: RegistrarCuentaTask? = null
+    lateinit var mProgressBar : ProgressBar
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
@@ -55,14 +66,14 @@ class RegistrarCuentaActivity: AccountAuthenticatorActivity()
         btnRegistrar = findViewById(R.id.btnRegistrar)
         btnResetData = findViewById(R.id.btnResetData)
 
-        this._context = this
+        this.mContext = this
 
         btnResetData.setOnClickListener{
             this.resetData()
         }
 
         btnRegistrar.setOnClickListener {
-            this.initial()
+            this.sendData()
         }
 
         this.mAccountManager = AccountManager.get(this)
@@ -70,38 +81,33 @@ class RegistrarCuentaActivity: AccountAuthenticatorActivity()
         mUsername = intent.getStringExtra(PARAM_USERNAME)
         mRequestNewAccount = (mUsername == null)
         mConfirmCredentials = intent.getBooleanExtra(PARAM_CONFIRM_CREDENTIALS, false)
-        mIMEI = "863166032574597"
+        this.mIMEI = "863166032574597"
+
+        this.mProgressBar = findViewById(R.id.progressBar)
+        this.mProgressBar.isIndeterminate = true
+        this.mProgressBar.visibility = View.GONE
     }
 
-    fun initial()
+    fun sendData()
     {
         mUsername = editTxtLoginName.text.toString()
         mPassword = editTxtPassword.text.toString()
 
         Constants.ACCOUNT_NAME = mUsername!!
-
         this.task = RegistrarCuentaTask()
         task?.messages = "Descargando datos..."
         task?.actions = Acciones.INITIAL
         task?.execute()
 
+
     }
 
-    fun resetData() {
+    fun resetData()
+    {
         this.task = RegistrarCuentaTask()
         this.task?.messages = "Eliminando datos..."
         this.task?.actions = Acciones.ELIMINAR_TODO
         this.task?.execute()
-    }
-
-    enum class Acciones(val value : Int)
-    {
-        ELIMINAR_TODO(0),
-        INITIAL(1);
-
-        companion object {
-            fun from(findValue: Int): Acciones = Acciones.values().first { it.value == findValue }
-        }
     }
 
     private fun finishLogin(authToken: String)
@@ -117,82 +123,63 @@ class RegistrarCuentaActivity: AccountAuthenticatorActivity()
             }
         }
 
-        mAccountManager.setAuthToken(account, AccountManager.KEY_AUTHTOKEN, authToken)
-        mAccountManager.setUserData(account, Constants.IMEI_SMARTPHONE, this.mIMEI)
-        mAccountManager.setUserData(account, Constants.AUTH_TOKEN, authToken)
-        mAccountManager.setPassword(account, mPassword)
-
         if (mRequestNewAccount)
         {
             val data = Bundle()
-            data.putString(Constants.IMEI_SMARTPHONE, this.mIMEI)
             mAccountManager.addAccountExplicitly(account, mPassword, data)
-            ContentResolver.setIsSyncable(account, RegistroHoraContract.AUTHORITY, 1)
-            ContentResolver.setSyncAutomatically(account, RegistroHoraContract.AUTHORITY, true)
+            mAccountManager.setUserData(account, Constants.IMEI_SMARTPHONE, this.mIMEI)
+            mAccountManager.setUserData(account, Constants.AUTH_TOKEN, authToken)
+            mAccountManager.setPassword(account, mPassword)
+
+            ContentResolver.setIsSyncable(account, TSummaryContract.AUTHORITY, 1)
+            ContentResolver.setSyncAutomatically(account, TSummaryContract.AUTHORITY, true)
+        }
+        else
+        {
+            mAccountManager.setUserData(account, Constants.IMEI_SMARTPHONE, this.mIMEI)
+            mAccountManager.setUserData(account, Constants.AUTH_TOKEN, authToken)
+            mAccountManager.setPassword(account, mPassword)
+            mAccountManager.setAuthToken(account, Constants.AUTH_TOKEN, authToken)
         }
 
-        val intent = Intent()
-        intent.putExtra(AccountManager.KEY_ACCOUNT_NAME, mUsername)
-        intent.putExtra(AccountManager.KEY_ACCOUNT_TYPE, Constants.ACCOUNT_TYPE)
-        intent.putExtra(AccountManager.KEY_AUTHTOKEN, authToken)
-        setAccountAuthenticatorResult(intent.extras)
-        setResult(Activity.RESULT_OK, intent)
-        //finish()
+        val intent = Intent(this.mContext, SchedulerActivity::class.java)
+        startActivity(intent)
     }
 
-    fun onAuthenticationResult(authToken: String?) {
+    fun onAuthenticationResult(authToken: String?)
+    {
         val success = authToken != null && authToken.length > 0
         Log.i(TAG, "onAuthenticationResult($success)")
-        // Our task is complete, so clear it out
-        task = null
-        // Hide the progress dialog
-        //hideProgress()
+        this.task = null
         if (success)
         {
             if (!mConfirmCredentials)
             {
                 finishLogin(authToken!!)
             }
-            else
-            {
-                //finishConfirmCredentials(success)
-            }
-        } else {
-
         }
     }
-<<<<<<< HEAD
-
-    internal inner class RegistrarCuenta(): AsyncTask<Void, Void, String>()
-    {
-=======
->>>>>>> c76c410fc17bfe7a6ce3e0a064cad5e93707bd6c
 
     inner class RegistrarCuentaTask(): AsyncTask<Void, Void, String>()
     {
         lateinit var actions : Acciones
         lateinit var messages : String
-        lateinit var progressDialog: ProgressDialog
 
         override fun onPreExecute() {
             super.onPreExecute()
-            progressDialog = ProgressDialog(_context)
-            progressDialog.setTitle(messages)
-            progressDialog.setCancelable(false)
-            progressDialog.show()
+            mProgressBar.visibility = View.VISIBLE
         }
 
         override fun doInBackground(vararg params: Void?): String {
-            if (NetWorkStatus.isNetworkAvailable(_context))
+            if (NetWorkStatus.isNetworkAvailable(mContext))
             {
                 if (actions == Acciones.INITIAL)
                 {
-                    val autentificar = AutentificarController(_context)
+                    val autentificar = AutentificarController(mContext)
                     val sesionLocal = autentificar.register(mIMEI!!, mUsername!!, mPassword!!)
                     if (sesionLocal?.authToken != "")
                     {
-                        onAuthenticationResult(sesionLocal?.authToken)
-                        return "OK"
+                        return sesionLocal?.authToken!!
                     }
                     else
                     {
@@ -201,7 +188,7 @@ class RegistrarCuentaActivity: AccountAuthenticatorActivity()
                 }
                 else if (actions == Acciones.ELIMINAR_TODO)
                 {
-                    val controller = ProyectoController(_context)
+                    val controller = ProyectoController(mContext)
                     controller.resetData()
                     return "ERROR"
                 }
@@ -215,12 +202,9 @@ class RegistrarCuentaActivity: AccountAuthenticatorActivity()
 
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
-            progressDialog.dismiss()
-            if (result != null && result == "PASS")
-            {
-                val intent = Intent(_context, SchedulerActivity:: class.java)
-                _context.startActivity(intent)
-            }
+            mProgressBar.visibility = View.GONE
+            onAuthenticationResult(result)
         }
     }
+
 }

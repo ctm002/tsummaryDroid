@@ -14,7 +14,8 @@ class ListHorasAdapter(val items: List<RegistroHora>, context: Context) : Recycl
     val mItems = items
     val mContext = context
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderRegistroHoras {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderRegistroHoras
+    {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.list_registro_horas, parent, false)
         return ViewHolderRegistroHoras(view).listen { pos, type ->
             val item = mItems.get(pos)
@@ -24,18 +25,21 @@ class ListHorasAdapter(val items: List<RegistroHora>, context: Context) : Recycl
         }
     }
 
-    override fun onBindViewHolder(holder: ViewHolderRegistroHoras, position: Int) {
+    override fun onBindViewHolder(holder: ViewHolderRegistroHoras, position: Int)
+    {
         holder.setCliente(this.mItems.get(position).getNombreCliente()!!)
         holder.setProyecto(this.mItems.get(position).getNombreProyecto()!!)
         holder.setHora(this.mItems.get(position).getHoraTotal())
         holder.setAsunto(this.mItems.get(position).mAsunto)
     }
 
-    override fun getItemCount(): Int {
+    override fun getItemCount(): Int
+    {
         return this.mItems.size
     }
 
-    class ViewHolderRegistroHoras(v: View?) : RecyclerView.ViewHolder(v) {
+    class ViewHolderRegistroHoras(v: View?) : RecyclerView.ViewHolder(v)
+    {
 
         var mTxtBoxCliente: TextView
         var mTxtBoxProyecto: TextView

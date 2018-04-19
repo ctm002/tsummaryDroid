@@ -10,14 +10,17 @@ class RegistroHoraParser
     companion object {
         fun parse(item: JSONObject): RegistroHora
         {
-            val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+            val dateFormat1 = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+
             val registro = RegistroHora()
             registro.mCorrelativo = item.getInt("tim_correl")
             registro.mProyectoId = item.getInt("pro_id")
-            registro.mFechaIng = format.parse(item.getString("fechaInicio"))
-            registro.mInicio = Hora(item.getInt("tim_horas"), item.getInt("tim_minutos"))
+            registro.mFechaIng = dateFormat1.parse(item.getString("fechaInicio"))
+            val fechaInicio = dateFormat1.parse(item.getString("fechaInicio"))
+            registro.mInicio = Hora(fechaInicio.hours, fechaInicio.minutes)
             registro.mAsunto = item.getString("tim_asunto")
-            registro.mFechaInsert = format.parse(item.getString("tim_fecha_insert"))
+            registro.mFechaInsert = dateFormat1.parse(item.getString("tim_fecha_insert"))
+            registro.mFechaUpdate = dateFormat1.parse(item.getString("tim_fecha_insert"))
             registro.mEstado = Estados.ANTIGUO
             registro.mModificable = item.getInt("nro_folio") == 0
             registro.mOffLine = false

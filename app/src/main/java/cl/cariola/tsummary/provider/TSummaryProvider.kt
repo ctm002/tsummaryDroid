@@ -10,9 +10,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 import cl.cariola.tsummary.util.SelectionBuilder
 
-class RegistroHoraProvider: ContentProvider() {
+class TSummaryProvider: ContentProvider() {
 
-    private val AUTHORITY = RegistroHoraContract.AUTHORITY
+    private val AUTHORITY = TSummaryContract.AUTHORITY
 
     val ROUTE_HORAS = 1
     val ROUTE_HORAS_ID = 2
@@ -41,10 +41,10 @@ class RegistroHoraProvider: ContentProvider() {
         val match = sUriMatcher.match(uri)
         when (match)
         {
-            ROUTE_HORAS -> return RegistroHoraContract.RegistroHora.CONTENT_TYPE
-            ROUTE_HORAS_ID -> return RegistroHoraContract.RegistroHora.CONTENT_ITEM_TYPE
-            ROUTE_PROYECTOS -> return RegistroHoraContract.Proyecto.CONTENT_ITEM_TYPE
-            ROUTE_PROYECTOS_ID -> return RegistroHoraContract.Proyecto.CONTENT_ITEM_TYPE
+            ROUTE_HORAS -> return TSummaryContract.RegistroHora.CONTENT_TYPE
+            ROUTE_HORAS_ID -> return TSummaryContract.RegistroHora.CONTENT_ITEM_TYPE
+            ROUTE_PROYECTOS -> return TSummaryContract.Proyecto.CONTENT_ITEM_TYPE
+            ROUTE_PROYECTOS_ID -> return TSummaryContract.Proyecto.CONTENT_ITEM_TYPE
             else -> throw UnsupportedOperationException("Unknown uri: $uri")
         }
     }
@@ -58,7 +58,7 @@ class RegistroHoraProvider: ContentProvider() {
         when (uriMatch) {
             ROUTE_HORAS ->
             {
-                builder.table(RegistroHoraContract.RegistroHora.TABlE_NAME).where(selection, selectionArgs.joinToString { "" })
+                builder.table(TSummaryContract.RegistroHora.TABlE_NAME).where(selection, selectionArgs.joinToString { "" })
                 val c = builder.query(db, projection, sortOrder)
                 val ctx = context
                 assert(ctx != null)
@@ -69,9 +69,9 @@ class RegistroHoraProvider: ContentProvider() {
             ROUTE_HORAS_ID -> {
                 // Return a single entry, by ID.
                 val id = uri.getLastPathSegment()
-                builder.where(RegistroHoraContract.RegistroHora.COL_ID + "=?", id)
+                builder.where(TSummaryContract.RegistroHora.COL_ID + "=?", id)
                 // Return all known entries.
-                builder.table(RegistroHoraContract.RegistroHora.TABlE_NAME)
+                builder.table(TSummaryContract.RegistroHora.TABlE_NAME)
                         .where(selection, selectionArgs.joinToString { " " })
                 val c = builder.query(db, projection, sortOrder)
                 // Note: Notification URI must be manually set here for loaders to correctly
@@ -84,7 +84,7 @@ class RegistroHoraProvider: ContentProvider() {
 
             ROUTE_PROYECTOS ->
             {
-                builder.table(RegistroHoraContract.Proyecto.TABlE_NAME).where(selection, selectionArgs.joinToString { "" })
+                builder.table(TSummaryContract.Proyecto.TABlE_NAME).where(selection, selectionArgs.joinToString { "" })
                 val c = builder.query(db, projection, sortOrder)
                 val ctx = context
                 assert(ctx != null)
@@ -95,8 +95,8 @@ class RegistroHoraProvider: ContentProvider() {
             ROUTE_PROYECTOS_ID ->
             {
                 val id = uri.getLastPathSegment()
-                builder.where(RegistroHoraContract.Proyecto.COL_ID + "=?", id)
-                builder.table(RegistroHoraContract.Proyecto.TABlE_NAME)
+                builder.where(TSummaryContract.Proyecto.COL_ID + "=?", id)
+                builder.table(TSummaryContract.Proyecto.TABlE_NAME)
                         .where(selection, selectionArgs.joinToString { " " })
                 val c = builder.query(db, projection, sortOrder)
 
@@ -120,16 +120,16 @@ class RegistroHoraProvider: ContentProvider() {
         when (match) {
             ROUTE_HORAS ->
             {
-                val id = db!!.insertOrThrow(RegistroHoraContract.RegistroHora.TABlE_NAME, null, values)
-                result = Uri.parse("${RegistroHoraContract.RegistroHora.CONTENT_URI}/${id}")
+                val id = db!!.insertOrThrow(TSummaryContract.RegistroHora.TABlE_NAME, null, values)
+                result = Uri.parse("${TSummaryContract.RegistroHora.CONTENT_URI}/${id}")
             }
 
             ROUTE_HORAS_ID -> throw UnsupportedOperationException("Insert not supported on URI: $uri")
 
             ROUTE_PROYECTOS ->
             {
-                val id = db!!.insertOrThrow(RegistroHoraContract.Proyecto.TABlE_NAME, null, values)
-                result = Uri.parse("${RegistroHoraContract.Proyecto.CONTENT_URI}/${id}")
+                val id = db!!.insertOrThrow(TSummaryContract.Proyecto.TABlE_NAME, null, values)
+                result = Uri.parse("${TSummaryContract.Proyecto.CONTENT_URI}/${id}")
             }
 
             ROUTE_PROYECTOS_ID -> throw UnsupportedOperationException("Insert not supported on URI: $uri")
@@ -153,27 +153,27 @@ class RegistroHoraProvider: ContentProvider() {
 
         when (match) {
 
-            ROUTE_HORAS -> count = builder.table(RegistroHoraContract.RegistroHora.TABlE_NAME)
+            ROUTE_HORAS -> count = builder.table(TSummaryContract.RegistroHora.TABlE_NAME)
                 .where(selection, selectionArgs.joinToString { " " })
                 .delete(db)
 
             ROUTE_HORAS_ID ->
             {
                 val id = uri.getLastPathSegment()
-                count = builder.table(RegistroHoraContract.RegistroHora.TABlE_NAME)
-                        .where(RegistroHoraContract.RegistroHora.COL_ID + "=?", id)
+                count = builder.table(TSummaryContract.RegistroHora.TABlE_NAME)
+                        .where(TSummaryContract.RegistroHora.COL_ID + "=?", id)
                         .where(selection, selectionArgs.joinToString {  "" })
                         .delete(db)
             }
 
-            ROUTE_PROYECTOS -> count = builder.table(RegistroHoraContract.Proyecto.TABlE_NAME)
+            ROUTE_PROYECTOS -> count = builder.table(TSummaryContract.Proyecto.TABlE_NAME)
                     .where(selection, selectionArgs.joinToString {" "})
                     .delete(db)
 
             ROUTE_PROYECTOS_ID -> {
                 val id = uri.getLastPathSegment()
-                count = builder.table(RegistroHoraContract.Proyecto.TABlE_NAME)
-                        .where(RegistroHoraContract.RegistroHora.COL_ID + "=?", id)
+                count = builder.table(TSummaryContract.Proyecto.TABlE_NAME)
+                        .where(TSummaryContract.RegistroHora.COL_ID + "=?", id)
                         .where(selection, selectionArgs.joinToString {" "})
                         .delete(db)
             }
@@ -196,26 +196,26 @@ class RegistroHoraProvider: ContentProvider() {
 
         when (match) {
 
-            ROUTE_HORAS -> count = builder.table(RegistroHoraContract.RegistroHora.TABlE_NAME)
+            ROUTE_HORAS -> count = builder.table(TSummaryContract.RegistroHora.TABlE_NAME)
                 .where(selection, selectionArgs.joinToString { " " })
                 .update(db, values)
 
             ROUTE_HORAS_ID -> {
                 val id = uri.getLastPathSegment()
-                count = builder.table(RegistroHoraContract.RegistroHora.TABlE_NAME)
-                .where(RegistroHoraContract.RegistroHora.COL_ID + "=?", id)
+                count = builder.table(TSummaryContract.RegistroHora.TABlE_NAME)
+                .where(TSummaryContract.RegistroHora.COL_ID + "=?", id)
                 .where(selection, selectionArgs.joinToString {  " " })
                 .update(db, values)
             }
 
-            ROUTE_PROYECTOS -> count = builder.table(RegistroHoraContract.Proyecto.TABlE_NAME)
+            ROUTE_PROYECTOS -> count = builder.table(TSummaryContract.Proyecto.TABlE_NAME)
                     .where(selection, selectionArgs.joinToString { " " })
                     .update(db, values)
 
             ROUTE_PROYECTOS_ID -> {
                 val id = uri.getLastPathSegment()
-                count = builder.table(RegistroHoraContract.Proyecto.TABlE_NAME)
-                        .where(RegistroHoraContract.RegistroHora.COL_ID + "=?", id)
+                count = builder.table(TSummaryContract.Proyecto.TABlE_NAME)
+                        .where(TSummaryContract.RegistroHora.COL_ID + "=?", id)
                         .where(selection, selectionArgs.joinToString {  " " })
                         .update(db, values)
             }
@@ -247,11 +247,11 @@ class RegistroHoraProvider: ContentProvider() {
             val DATABASE_VERSION = 1
             val DATABASE_NAME = "tsummary.db"
 
-            private val SQL_CREATE_TB_HORAS = RegistroHoraContract.RegistroHora.CREATE_TABLE
-            private val SQL_CREATE_TB_PROYECTOS = RegistroHoraContract.Proyecto.CREATE_TABLE
+            private val SQL_CREATE_TB_HORAS = TSummaryContract.RegistroHora.CREATE_TABLE
+            private val SQL_CREATE_TB_PROYECTOS = TSummaryContract.Proyecto.CREATE_TABLE
 
-            private val SQL_DELETE_TB_HORAS = "DROP TABLE IF EXISTS " + RegistroHoraContract.RegistroHora.TABlE_NAME
-            private val SQL_DELETE_TB_PROYECTOS = "DROP TABLE IF EXISTS " + RegistroHoraContract.Proyecto.TABlE_NAME
+            private val SQL_DELETE_TB_HORAS = "DROP TABLE IF EXISTS " + TSummaryContract.RegistroHora.TABlE_NAME
+            private val SQL_DELETE_TB_PROYECTOS = "DROP TABLE IF EXISTS " + TSummaryContract.Proyecto.TABlE_NAME
         }
     }
 

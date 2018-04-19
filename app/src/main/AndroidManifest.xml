@@ -35,8 +35,8 @@
             android:parentActivityName=".RegistrarCuentaActivity" />
 
         <provider
-            android:name=".provider.RegistroHoraProvider"
-            android:authorities="cl.cariola.tsummary.provider.RegistroHoraProvider"
+            android:name=".provider.TSummaryProvider"
+            android:authorities="cl.cariola.tsummary.provider.TSummaryProvider"
             android:enabled="true"
             android:exported="true"></provider>
 
