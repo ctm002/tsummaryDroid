@@ -15,7 +15,6 @@ import java.util.*
 
 class SchedulerActivity : AppCompatActivity(), AsyncResponse {
 
-
     lateinit var recyclerView : RecyclerView
     lateinit var startDate : Date
     lateinit var btnAdd: FloatingActionButton
@@ -26,7 +25,7 @@ class SchedulerActivity : AppCompatActivity(), AsyncResponse {
         setContentView(R.layout.activity_scheduler)
 
         this.recyclerView = findViewById<RecyclerView>(R.id.recycler_view_horas)
-        this.recyclerView.layoutManager = LinearLayoutManager(this)
+        this.recyclerView.layoutManager = LinearLayoutManager(this) as RecyclerView.LayoutManager?
 
         val dateFormat = SimpleDateFormat("yyyy-MM-dd")
         this.startDate = dateFormat.parse("2018-05-03")
