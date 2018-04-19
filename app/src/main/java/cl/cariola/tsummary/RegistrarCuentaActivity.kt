@@ -103,7 +103,6 @@ class RegistrarCuentaActivity: AccountAuthenticatorActivity()
         }
     }
 
-
     private fun finishLogin(authToken: String)
     {
         val account = Account(mUsername, Constants.ACCOUNT_TYPE)
@@ -154,6 +153,7 @@ class RegistrarCuentaActivity: AccountAuthenticatorActivity()
 
         }
     }
+
     internal inner class RegistrarCuenta(): AsyncTask<Void, Void, String>()
     {
 
