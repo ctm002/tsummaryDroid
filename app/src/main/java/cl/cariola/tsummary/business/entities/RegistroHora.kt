@@ -42,6 +42,7 @@ class RegistroHora {
     {
 
         this.mCorrelativo = cursor.getInt(cursor.getColumnIndex(TSContract.RegistroHora.COL_TIM_CORREL))
+        this.mId  = cursor.getInt(cursor.getColumnIndex(TSContract.RegistroHora.COL_ID))
 
         val cliente = Cliente(0, "", null, "")
         cliente.nombre = cursor.getString(cursor.getColumnIndex(TSContract.Proyecto.COL_CLI_NOM))

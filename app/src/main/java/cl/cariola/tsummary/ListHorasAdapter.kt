@@ -23,18 +23,10 @@ class ListHorasAdapter(val cursor: Cursor, context: Context) : RecyclerView.Adap
         return ViewHolderRegistroHoras(view).listen { pos, type ->
 
             this.mItems.moveToPosition(pos)
-            val correlativo = this.mItems.getColumnIndex(TSContract.RegistroHora.COL_TIM_CORREL)
-            val id = this.mItems.getColumnIndex(TSContract.RegistroHora.COL_ID)
-
-            var registro = RegistroHora()
-            registro.mCorrelativo = correlativo
-
             var intent = Intent(this.mContext, RegistrarHoraActivity::class.java)
-            intent.putExtra("registro", Gson().toJson(registro))
+            intent.putExtra("registro", Gson().toJson(RegistroHora(this.mItems)))
             this.mContext.startActivity(intent)
-
         }
-
     }
 
     override fun onBindViewHolder(holder: ViewHolderRegistroHoras, position: Int)
