@@ -35,8 +35,8 @@
             android:parentActivityName=".RegistrarCuentaActivity" />
 
         <provider
-            android:name=".provider.TSummaryProvider"
-            android:authorities="cl.cariola.tsummary.provider.TSummaryProvider"
+            android:name=".provider.TSProvider"
+            android:authorities="cl.cariola.tsummary.provider.TSProvider"
             android:enabled="true"
             android:exported="true"></provider>
 
@@ -51,6 +51,7 @@
                 android:name="android.content.SyncAdapter"
                 android:resource="@xml/syncadapter" />
         </service>
+
         <service android:name=".accounts.GenericAccountService">
             <intent-filter>
                 <action android:name="android.accounts.AccountAuthenticator" />

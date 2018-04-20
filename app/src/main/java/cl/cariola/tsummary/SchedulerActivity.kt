@@ -9,7 +9,7 @@ import android.util.Log
 import cl.cariola.tsummary.business.controllers.ProyectoController
 import cl.cariola.tsummary.business.entities.Estados
 import cl.cariola.tsummary.business.entities.RegistroHora
-import cl.cariola.tsummary.provider.TSummaryContract
+import cl.cariola.tsummary.provider.TSContract
 import com.google.gson.Gson
 import java.text.SimpleDateFormat
 import java.util.*
@@ -38,13 +38,11 @@ class SchedulerActivity : AppCompatActivity(), AsyncResponse {
 
         btnAdd = findViewById(R.id.btnAdd)
         btnAdd.setOnClickListener {
-
             var registro = RegistroHora()
             registro.mId = 0
             registro.mCorrelativo = 0
             registro.mAbogadoId = 20
             registro.mEstado = Estados.NUEVO
-
             val gson = Gson()
             var intent = Intent(this, RegistrarHoraActivity::class.java)
             intent.putExtra("registro", gson.toJson(registro))
@@ -53,16 +51,13 @@ class SchedulerActivity : AppCompatActivity(), AsyncResponse {
     }
 
     private fun loadItems() {
-        val proyectoController = ProyectoController(this)
-        val selection = "${TSummaryContract.RegistroHora.COL_ABO_ID}=? AND strftime('%Y-%m-%d',${TSummaryContract.RegistroHora.COL_FECHA_ING})=?"
-        var selectionArgs  = arrayOf<String>("1", "20",  this.dateFormat.format(this.startDate))
+        val selection = "${TSContract.RegistroHora.COL_ABO_ID}=? AND strftime('%Y-%m-%d',${TSContract.RegistroHora.COL_FECHA_ING})=?"
+        var selectionArgs  = arrayOf<String>("20",  this.dateFormat.format(this.startDate))
 
         val contentResolver = this.contentResolver
-        val cursor = this.contentResolver.query(TSummaryContract.RegistroHora.CONTENT_URI, TSummaryContract.RegistroHora.PROJECTION_REGISTRO_HORA, selection, selectionArgs, "")
+        val cursor = this.contentResolver.query(TSContract.RegistroHora.CONTENT_URI, TSContract.RegistroHora.PROJECTION_REGISTRO_HORA_PROYECTO , selection, selectionArgs, "")
         Log.d(TAG, cursor.count.toString())
-
-        val items = proyectoController.getListHorasByCodigoAndFecha(20, startDate)
-        val adapter = ListHorasAdapter(items, this)
+        val adapter = ListHorasAdapter(cursor, this)
         this.recyclerView.adapter = adapter
     }
 

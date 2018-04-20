@@ -15,10 +15,9 @@ import android.accounts.AccountAuthenticatorActivity
 import android.util.Log
 import android.view.View
 import android.widget.ProgressBar
-import cl.cariola.tsummary.provider.TSummaryContract
+import cl.cariola.tsummary.provider.TSContract
 
-enum class Acciones(val value : Int)
-{
+enum class Acciones(val value: Int) {
     ELIMINAR_TODO(0),
     INITIAL(1);
 
@@ -27,13 +26,12 @@ enum class Acciones(val value : Int)
     }
 }
 
-class RegistrarCuentaActivity: AccountAuthenticatorActivity()
-{
+class RegistrarCuentaActivity : AccountAuthenticatorActivity() {
 
-    lateinit var editTxtLoginName : EditText
-    lateinit var editTxtPassword : EditText
-    lateinit var btnRegistrar : Button
-    lateinit var btnResetData : Button
+    lateinit var editTxtLoginName: EditText
+    lateinit var editTxtPassword: EditText
+    lateinit var btnRegistrar: Button
+    lateinit var btnResetData: Button
     lateinit var mContext: Context
 
     /** The tag used to log to adb console.  */
@@ -47,14 +45,13 @@ class RegistrarCuentaActivity: AccountAuthenticatorActivity()
     private var mRequestNewAccount = false
     private var mConfirmCredentials = false
 
-    var mUsername: String?  = null
+    var mUsername: String? = null
     var mPassword: String? = null
     var mIMEI: String? = null
     var task: RegistrarCuentaTask? = null
-    lateinit var mProgressBar : ProgressBar
+    lateinit var mProgressBar: ProgressBar
 
-    override fun onCreate(savedInstanceState: Bundle?)
-    {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_registrar_cuenta)
 
@@ -68,7 +65,7 @@ class RegistrarCuentaActivity: AccountAuthenticatorActivity()
 
         this.mContext = this
 
-        btnResetData.setOnClickListener{
+        btnResetData.setOnClickListener {
             this.resetData()
         }
 
@@ -88,8 +85,7 @@ class RegistrarCuentaActivity: AccountAuthenticatorActivity()
         this.mProgressBar.visibility = View.GONE
     }
 
-    fun sendData()
-    {
+    fun sendData() {
         mUsername = editTxtLoginName.text.toString()
         mPassword = editTxtPassword.text.toString()
 
@@ -102,40 +98,33 @@ class RegistrarCuentaActivity: AccountAuthenticatorActivity()
 
     }
 
-    fun resetData()
-    {
+    fun resetData() {
         this.task = RegistrarCuentaTask()
         this.task?.messages = "Eliminando datos..."
         this.task?.actions = Acciones.ELIMINAR_TODO
         this.task?.execute()
     }
 
-    private fun finishLogin(authToken: String)
-    {
+    private fun finishLogin(authToken: String) {
         val account = Account(mUsername, Constants.ACCOUNT_TYPE)
-        var accounts = mAccountManager.accounts.filter { it.type == Constants.ACCOUNT_TYPE}
-        for (acc in accounts)
-        {
-            if (acc.name == mUsername)
-            {
+        var accounts = mAccountManager.accounts.filter { it.type == Constants.ACCOUNT_TYPE }
+        for (acc in accounts) {
+            if (acc.name == mUsername) {
                 mRequestNewAccount = false
                 break
             }
         }
 
-        if (mRequestNewAccount)
-        {
+        if (mRequestNewAccount) {
             val data = Bundle()
             mAccountManager.addAccountExplicitly(account, mPassword, data)
             mAccountManager.setUserData(account, Constants.IMEI_SMARTPHONE, this.mIMEI)
             mAccountManager.setUserData(account, Constants.AUTH_TOKEN, authToken)
             mAccountManager.setPassword(account, mPassword)
 
-            ContentResolver.setIsSyncable(account, TSummaryContract.AUTHORITY, 1)
-            ContentResolver.setSyncAutomatically(account, TSummaryContract.AUTHORITY, true)
-        }
-        else
-        {
+            ContentResolver.setIsSyncable(account, TSContract.AUTHORITY, 1)
+            ContentResolver.setSyncAutomatically(account, TSContract.AUTHORITY, true)
+        } else {
             mAccountManager.setUserData(account, Constants.IMEI_SMARTPHONE, this.mIMEI)
             mAccountManager.setUserData(account, Constants.AUTH_TOKEN, authToken)
             mAccountManager.setPassword(account, mPassword)
@@ -146,24 +135,20 @@ class RegistrarCuentaActivity: AccountAuthenticatorActivity()
         startActivity(intent)
     }
 
-    fun onAuthenticationResult(authToken: String?)
-    {
+    fun onAuthenticationResult(authToken: String?) {
         val success = authToken != null && authToken.length > 0
         Log.i(TAG, "onAuthenticationResult($success)")
         this.task = null
-        if (success)
-        {
-            if (!mConfirmCredentials)
-            {
+        if (success) {
+            if (!mConfirmCredentials) {
                 finishLogin(authToken!!)
             }
         }
     }
 
-    inner class RegistrarCuentaTask(): AsyncTask<Void, Void, String>()
-    {
-        lateinit var actions : Acciones
-        lateinit var messages : String
+    inner class RegistrarCuentaTask() : AsyncTask<Void, Void, String>() {
+        lateinit var actions: Acciones
+        lateinit var messages: String
 
         override fun onPreExecute() {
             super.onPreExecute()
@@ -171,31 +156,22 @@ class RegistrarCuentaActivity: AccountAuthenticatorActivity()
         }
 
         override fun doInBackground(vararg params: Void?): String {
-            if (NetWorkStatus.isNetworkAvailable(mContext))
-            {
-                if (actions == Acciones.INITIAL)
-                {
+            if (NetWorkStatus.isNetworkAvailable(mContext)) {
+                if (actions == Acciones.INITIAL) {
                     val autentificar = AutentificarController(mContext)
                     val sesionLocal = autentificar.register(mIMEI!!, mUsername!!, mPassword!!)
-                    if (sesionLocal?.authToken != "")
-                    {
+                    if (sesionLocal?.authToken != "") {
                         return sesionLocal?.authToken!!
-                    }
-                    else
-                    {
+                    } else {
                         return "FAIL"
                     }
-                }
-                else if (actions == Acciones.ELIMINAR_TODO)
-                {
+                } else if (actions == Acciones.ELIMINAR_TODO) {
                     val controller = ProyectoController(mContext)
                     controller.resetData()
                     return "ERROR"
                 }
                 return ""
-            }
-            else
-            {
+            } else {
                 return "SIN INTERNET"
             }
         }

@@ -156,6 +156,6 @@ class SelectionBuilder {
     }
 
     companion object {
-        private val TAG = "basicsyncadapter"
+        private val TAG = "TSProvider"
     }
 }

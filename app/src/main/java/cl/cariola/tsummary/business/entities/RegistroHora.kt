@@ -1,9 +1,10 @@
 package cl.cariola.tsummary.business.entities
+import android.database.Cursor
+import cl.cariola.tsummary.provider.TSContract
 import java.util.Date
 
+class RegistroHora {
 
-class RegistroHora
-{
     var mCorrelativo: Int = 0
     var mAsunto: String = ""
     var mAbogadoId: Int = 0
@@ -34,5 +35,26 @@ class RegistroHora
     fun getHoraTotal(): String {
         return "${ String.format("%02d",mHoraTotal.horas)}:${String.format("%02d",mHoraTotal.minutos)}"
     }
+
+    constructor(){}
+
+    constructor(cursor: Cursor)
+    {
+
+        this.mCorrelativo = cursor.getInt(cursor.getColumnIndex(TSContract.RegistroHora.COL_TIM_CORREL))
+
+        val cliente = Cliente(0, "", null, "")
+        cliente.nombre = cursor.getString(cursor.getColumnIndex(TSContract.Proyecto.COL_CLI_NOM))
+
+        this.mProyecto = Proyecto(0, "", cliente,1, Date())
+        this.mProyecto?.nombre = cursor.getString(cursor.getColumnIndex(TSContract.Proyecto.COL_NOMBRE))
+
+        this.mAsunto = cursor.getString(cursor.getColumnIndex(TSContract.RegistroHora.COL_TIM_ASUNTO))
+
+
+        this.mHoraTotal.horas = cursor.getInt(cursor.getColumnIndex(TSContract.RegistroHora.COL_TIM_HORAS))
+        this.mHoraTotal.minutos = cursor.getInt(cursor.getColumnIndex(TSContract.RegistroHora.COL_TIM_MINUTOS))
+
+     }
 
 }

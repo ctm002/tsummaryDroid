@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 import cl.cariola.tsummary.business.entities.*
-import cl.cariola.tsummary.provider.TSummaryContract
+import cl.cariola.tsummary.provider.TSContract
 import java.text.SimpleDateFormat
 
 
@@ -16,8 +16,8 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
 
     override fun onCreate(db: SQLiteDatabase?) {
         db?.execSQL(TbUsuario.createTable)
-        db?.execSQL(TSummaryContract.Proyecto.CREATE_TABLE)
-        db?.execSQL(TSummaryContract.RegistroHora.CREATE_TABLE)
+        db?.execSQL(TSContract.Proyecto.CREATE_TABLE)
+        db?.execSQL(TSContract.RegistroHora.CREATE_TABLE)
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {

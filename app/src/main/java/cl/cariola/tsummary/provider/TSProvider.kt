@@ -10,22 +10,23 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 import cl.cariola.tsummary.util.SelectionBuilder
 
-class TSummaryProvider: ContentProvider() {
+class TSProvider: ContentProvider() {
 
-    private val AUTHORITY = TSummaryContract.AUTHORITY
+    private val AUTHORITY = TSContract.AUTHORITY
 
     val ROUTE_HORAS = 1
     val ROUTE_HORAS_ID = 2
     val ROUTE_PROYECTOS = 3
     val ROUTE_PROYECTOS_ID = 4
+    val JOIN_DIR_TYPE = 10
 
     private val sUriMatcher = UriMatcher(UriMatcher.NO_MATCH)
     init
     {
-        sUriMatcher.addURI(AUTHORITY, "Horas", 1)
-        sUriMatcher.addURI(AUTHORITY, "Hora/#", 2)
-        sUriMatcher.addURI(AUTHORITY, "Proyectos", 3)
-        sUriMatcher.addURI(AUTHORITY, "Proyecto/#", 4)
+        sUriMatcher.addURI(AUTHORITY, "Horas", ROUTE_HORAS)
+        sUriMatcher.addURI(AUTHORITY, "Horas/#", ROUTE_HORAS_ID)
+        sUriMatcher.addURI(AUTHORITY, "Proyectos", ROUTE_PROYECTOS)
+        sUriMatcher.addURI(AUTHORITY, "Proyectos/#", ROUTE_PROYECTOS_ID)
     }
 
     lateinit private var mDataBaseHelper: DatabaseClient
@@ -41,15 +42,15 @@ class TSummaryProvider: ContentProvider() {
         val match = sUriMatcher.match(uri)
         when (match)
         {
-            ROUTE_HORAS -> return TSummaryContract.RegistroHora.CONTENT_TYPE
-            ROUTE_HORAS_ID -> return TSummaryContract.RegistroHora.CONTENT_ITEM_TYPE
-            ROUTE_PROYECTOS -> return TSummaryContract.Proyecto.CONTENT_ITEM_TYPE
-            ROUTE_PROYECTOS_ID -> return TSummaryContract.Proyecto.CONTENT_ITEM_TYPE
+            ROUTE_HORAS -> return TSContract.RegistroHora.CONTENT_TYPE
+            ROUTE_HORAS_ID -> return TSContract.RegistroHora.CONTENT_ITEM_TYPE
+            ROUTE_PROYECTOS -> return TSContract.Proyecto.CONTENT_TYPE
+            ROUTE_PROYECTOS_ID -> return TSContract.Proyecto.CONTENT_ITEM_TYPE
             else -> throw UnsupportedOperationException("Unknown uri: $uri")
         }
     }
 
-    override fun query(uri:Uri, projection:Array<String>, selection:String, selectionArgs:Array<String>, sortOrder:String):Cursor
+    override fun query(uri:Uri, projection:Array<String>, selection:String?, selectionArgs:Array<String>?, sortOrder:String?):Cursor
     {
         val db = mDataBaseHelper.readableDatabase
         val builder = SelectionBuilder()
@@ -57,8 +58,8 @@ class TSummaryProvider: ContentProvider() {
         when (uriMatch) {
             ROUTE_HORAS ->
             {
-                builder.table(TSummaryContract.RegistroHora.TABlE_NAME).where(selection, selectionArgs.joinToString { "" })
-                val c = builder.query(db, projection, sortOrder)
+                val c= db.query("${TSContract.RegistroHora.TABlE_NAME} r LEFT OUTER JOIN ${TSContract.Proyecto.TABlE_NAME} p ON r.${TSContract.RegistroHora.COL_PRO_ID}= p.${TSContract.Proyecto.COL_ID}",
+                        projection, selection, selectionArgs,null, null, sortOrder)
                 val ctx = context
                 assert(ctx != null)
                 c.setNotificationUri(ctx!!.contentResolver, uri)
@@ -66,15 +67,11 @@ class TSummaryProvider: ContentProvider() {
             }
 
             ROUTE_HORAS_ID -> {
-                // Return a single entry, by ID.
                 val id = uri.getLastPathSegment()
-                builder.where(TSummaryContract.RegistroHora.COL_ID + "=?", id)
-                // Return all known entries.
-                builder.table(TSummaryContract.RegistroHora.TABlE_NAME)
-                        .where(selection, selectionArgs.joinToString { " " })
-                val c = builder.query(db, projection, sortOrder)
-                // Note: Notification URI must be manually set here for loaders to correctly
-                // register ContentObservers.
+                builder.where(TSContract.RegistroHora.COL_ID + "=?", id)
+                builder.table(TSContract.RegistroHora.TABlE_NAME)
+                        .where(selection!!, selectionArgs!!.joinToString {""})
+                val c = builder.query(db, projection, sortOrder!!)
                 val ctx = context
                 assert(ctx != null)
                 c.setNotificationUri(ctx!!.contentResolver, uri)
@@ -83,8 +80,7 @@ class TSummaryProvider: ContentProvider() {
 
             ROUTE_PROYECTOS ->
             {
-                builder.table(TSummaryContract.Proyecto.TABlE_NAME).where(selection, selectionArgs.joinToString { "" })
-                val c = builder.query(db, projection, sortOrder)
+                val c= db.query(TSContract.Proyecto.TABlE_NAME, projection, selection, selectionArgs,null, null, sortOrder)
                 val ctx = context
                 assert(ctx != null)
                 c.setNotificationUri(ctx!!.contentResolver, uri)
@@ -94,10 +90,10 @@ class TSummaryProvider: ContentProvider() {
             ROUTE_PROYECTOS_ID ->
             {
                 val id = uri.getLastPathSegment()
-                builder.where(TSummaryContract.Proyecto.COL_ID + "=?", id)
-                builder.table(TSummaryContract.Proyecto.TABlE_NAME)
-                        .where(selection, selectionArgs.joinToString { " " })
-                val c = builder.query(db, projection, sortOrder)
+                builder.where(TSContract.Proyecto.COL_ID + "=?", id)
+                builder.table(TSContract.Proyecto.TABlE_NAME)
+                        .where(selection!!, selectionArgs!!.joinToString {""})
+                val c = builder.query(db, projection, sortOrder!!)
 
                 val ctx = context
                 assert(ctx != null)
@@ -119,16 +115,16 @@ class TSummaryProvider: ContentProvider() {
         when (match) {
             ROUTE_HORAS ->
             {
-                val id = db!!.insertOrThrow(TSummaryContract.RegistroHora.TABlE_NAME, null, values)
-                result = Uri.parse("${TSummaryContract.RegistroHora.CONTENT_URI}/${id}")
+                val id = db!!.insertOrThrow(TSContract.RegistroHora.TABlE_NAME, null, values)
+                result = Uri.parse("${TSContract.RegistroHora.CONTENT_URI}/${id}")
             }
 
             ROUTE_HORAS_ID -> throw UnsupportedOperationException("Insert not supported on URI: $uri")
 
             ROUTE_PROYECTOS ->
             {
-                val id = db!!.insertOrThrow(TSummaryContract.Proyecto.TABlE_NAME, null, values)
-                result = Uri.parse("${TSummaryContract.Proyecto.CONTENT_URI}/${id}")
+                val id = db!!.insertOrThrow(TSContract.Proyecto.TABlE_NAME, null, values)
+                result = Uri.parse("${TSContract.Proyecto.CONTENT_URI}/${id}")
             }
 
             ROUTE_PROYECTOS_ID -> throw UnsupportedOperationException("Insert not supported on URI: $uri")
@@ -152,27 +148,27 @@ class TSummaryProvider: ContentProvider() {
 
         when (match) {
 
-            ROUTE_HORAS -> count = builder.table(TSummaryContract.RegistroHora.TABlE_NAME)
+            ROUTE_HORAS -> count = builder.table(TSContract.RegistroHora.TABlE_NAME)
                 .where(selection, selectionArgs.joinToString { " " })
                 .delete(db)
 
             ROUTE_HORAS_ID ->
             {
                 val id = uri.getLastPathSegment()
-                count = builder.table(TSummaryContract.RegistroHora.TABlE_NAME)
-                        .where(TSummaryContract.RegistroHora.COL_ID + "=?", id)
+                count = builder.table(TSContract.RegistroHora.TABlE_NAME)
+                        .where(TSContract.RegistroHora.COL_ID + "=?", id)
                         .where(selection, selectionArgs.joinToString {  "" })
                         .delete(db)
             }
 
-            ROUTE_PROYECTOS -> count = builder.table(TSummaryContract.Proyecto.TABlE_NAME)
+            ROUTE_PROYECTOS -> count = builder.table(TSContract.Proyecto.TABlE_NAME)
                     .where(selection, selectionArgs.joinToString {" "})
                     .delete(db)
 
             ROUTE_PROYECTOS_ID -> {
                 val id = uri.getLastPathSegment()
-                count = builder.table(TSummaryContract.Proyecto.TABlE_NAME)
-                        .where(TSummaryContract.RegistroHora.COL_ID + "=?", id)
+                count = builder.table(TSContract.Proyecto.TABlE_NAME)
+                        .where(TSContract.RegistroHora.COL_ID + "=?", id)
                         .where(selection, selectionArgs.joinToString {" "})
                         .delete(db)
             }
@@ -195,26 +191,26 @@ class TSummaryProvider: ContentProvider() {
 
         when (match) {
 
-            ROUTE_HORAS -> count = builder.table(TSummaryContract.RegistroHora.TABlE_NAME)
+            ROUTE_HORAS -> count = builder.table(TSContract.RegistroHora.TABlE_NAME)
                 .where(selection, selectionArgs.joinToString { " " })
                 .update(db, values)
 
             ROUTE_HORAS_ID -> {
                 val id = uri.getLastPathSegment()
-                count = builder.table(TSummaryContract.RegistroHora.TABlE_NAME)
-                .where(TSummaryContract.RegistroHora.COL_ID + "=?", id)
+                count = builder.table(TSContract.RegistroHora.TABlE_NAME)
+                .where(TSContract.RegistroHora.COL_ID + "=?", id)
                 .where(selection, selectionArgs.joinToString {  " " })
                 .update(db, values)
             }
 
-            ROUTE_PROYECTOS -> count = builder.table(TSummaryContract.Proyecto.TABlE_NAME)
+            ROUTE_PROYECTOS -> count = builder.table(TSContract.Proyecto.TABlE_NAME)
                     .where(selection, selectionArgs.joinToString { " " })
                     .update(db, values)
 
             ROUTE_PROYECTOS_ID -> {
                 val id = uri.getLastPathSegment()
-                count = builder.table(TSummaryContract.Proyecto.TABlE_NAME)
-                        .where(TSummaryContract.RegistroHora.COL_ID + "=?", id)
+                count = builder.table(TSContract.Proyecto.TABlE_NAME)
+                        .where(TSContract.RegistroHora.COL_ID + "=?", id)
                         .where(selection, selectionArgs.joinToString {  " " })
                         .update(db, values)
             }
@@ -246,11 +242,11 @@ class TSummaryProvider: ContentProvider() {
             val DATABASE_VERSION = 1
             val DATABASE_NAME = "tsummary.db"
 
-            private val SQL_CREATE_TB_HORAS = TSummaryContract.RegistroHora.CREATE_TABLE
-            private val SQL_CREATE_TB_PROYECTOS = TSummaryContract.Proyecto.CREATE_TABLE
+            private val SQL_CREATE_TB_HORAS = TSContract.RegistroHora.CREATE_TABLE
+            private val SQL_CREATE_TB_PROYECTOS = TSContract.Proyecto.CREATE_TABLE
 
-            private val SQL_DELETE_TB_HORAS = "DROP TABLE IF EXISTS " + TSummaryContract.RegistroHora.TABlE_NAME
-            private val SQL_DELETE_TB_PROYECTOS = "DROP TABLE IF EXISTS " + TSummaryContract.Proyecto.TABlE_NAME
+            private val SQL_DELETE_TB_HORAS = "DROP TABLE IF EXISTS " + TSContract.RegistroHora.TABlE_NAME
+            private val SQL_DELETE_TB_PROYECTOS = "DROP TABLE IF EXISTS " + TSContract.Proyecto.TABlE_NAME
         }
     }
 
