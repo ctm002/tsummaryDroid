@@ -6,6 +6,10 @@ import android.support.design.widget.FloatingActionButton
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.widget.Toast
 import cl.cariola.tsummary.business.entities.Estados
 import cl.cariola.tsummary.business.entities.RegistroHora
 import cl.cariola.tsummary.provider.TSContract
@@ -24,6 +28,12 @@ class SchedulerActivity : AppCompatActivity(), AsyncResponse {
 
     lateinit var startDate : Date
     var idAbogado : Int = 0
+
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_scheduler, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -68,5 +78,9 @@ class SchedulerActivity : AppCompatActivity(), AsyncResponse {
 
     }
 
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        Toast.makeText(this, item?.itemId.toString(), Toast.LENGTH_LONG).show()
+        return true
+    }
 }
 
