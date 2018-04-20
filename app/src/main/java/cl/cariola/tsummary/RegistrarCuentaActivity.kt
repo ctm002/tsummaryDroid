@@ -15,7 +15,10 @@ import android.accounts.AccountAuthenticatorActivity
 import android.util.Log
 import android.view.View
 import android.widget.ProgressBar
+import cl.cariola.tsummary.business.entities.SesionLocal
 import cl.cariola.tsummary.provider.TSContract
+import java.text.SimpleDateFormat
+import java.util.*
 
 enum class Acciones(val value: Int) {
     ELIMINAR_TODO(0),
@@ -33,8 +36,6 @@ class RegistrarCuentaActivity : AccountAuthenticatorActivity() {
     lateinit var btnRegistrar: Button
     lateinit var btnResetData: Button
     lateinit var mContext: Context
-
-    /** The tag used to log to adb console.  */
 
     private val TAG = "AuthenticatorActivity"
     lateinit var mAccountManager: AccountManager
@@ -83,6 +84,7 @@ class RegistrarCuentaActivity : AccountAuthenticatorActivity() {
         this.mProgressBar = findViewById(R.id.progressBar)
         this.mProgressBar.isIndeterminate = true
         this.mProgressBar.visibility = View.GONE
+
     }
 
     fun sendData() {
@@ -132,6 +134,11 @@ class RegistrarCuentaActivity : AccountAuthenticatorActivity() {
         }
 
         val intent = Intent(this.mContext, SchedulerActivity::class.java)
+
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd")
+        intent.putExtra("fecha", dateFormat.format(Date()))
+        val sesionLocal = SesionLocal(authToken, this.mIMEI!!)
+        intent.putExtra("idAbogado", sesionLocal.getIdAbogado())
         startActivity(intent)
     }
 
