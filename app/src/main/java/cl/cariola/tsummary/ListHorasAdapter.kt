@@ -1,4 +1,5 @@
 package cl.cariola.tsummary
+
 import android.content.Intent
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
@@ -11,13 +12,11 @@ import cl.cariola.tsummary.business.entities.RegistroHora
 import cl.cariola.tsummary.provider.TSContract
 import com.google.gson.Gson
 
-class ListHorasAdapter(val cursor: Cursor, context: Context) : RecyclerView.Adapter<ListHorasAdapter.ViewHolderRegistroHoras>()
-{
+class ListHorasAdapter(val cursor: Cursor, context: Context) : RecyclerView.Adapter<ListHorasAdapter.ViewHolderRegistroHoras>() {
     val mItems = cursor
     val mContext = context
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderRegistroHoras
-    {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolderRegistroHoras {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.list_registro_horas, parent, false)
 
         return ViewHolderRegistroHoras(view).listen { pos, type ->
@@ -29,8 +28,7 @@ class ListHorasAdapter(val cursor: Cursor, context: Context) : RecyclerView.Adap
         }
     }
 
-    override fun onBindViewHolder(holder: ViewHolderRegistroHoras, position: Int)
-    {
+    override fun onBindViewHolder(holder: ViewHolderRegistroHoras, position: Int) {
         this.mItems.moveToPosition(position)
         val registro = RegistroHora(this.mItems)
         holder.setCliente(registro.getNombreCliente()!!)
@@ -40,13 +38,11 @@ class ListHorasAdapter(val cursor: Cursor, context: Context) : RecyclerView.Adap
         holder.setHora(registro.getHoraTotal())
     }
 
-    override fun getItemCount(): Int
-    {
+    override fun getItemCount(): Int {
         return this.mItems.count
     }
 
-    class ViewHolderRegistroHoras(v: View?) : RecyclerView.ViewHolder(v)
-    {
+    class ViewHolderRegistroHoras(v: View?) : RecyclerView.ViewHolder(v) {
 
         var mTxtBoxCliente: TextView
         var mTxtBoxProyecto: TextView
@@ -54,8 +50,7 @@ class ListHorasAdapter(val cursor: Cursor, context: Context) : RecyclerView.Adap
         var mTxtBoxAsunto: TextView
         var mCorrelativo: Int
 
-        init
-        {
+        init {
             this.mTxtBoxCliente = this.itemView?.findViewById(R.id.tVCliente)!!
             this.mTxtBoxProyecto = this.itemView?.findViewById(R.id.tVProyecto)!!
             this.mTxtBoxHora = this.itemView?.findViewById(R.id.tVHora)!!
@@ -63,27 +58,25 @@ class ListHorasAdapter(val cursor: Cursor, context: Context) : RecyclerView.Adap
             this.mCorrelativo = 0
         }
 
-        fun setCliente(_Cliente: String){
+        fun setCliente(_Cliente: String) {
             this.mTxtBoxCliente.text = _Cliente
 
         }
 
-        fun setProyecto(_Proyecto: String){
+        fun setProyecto(_Proyecto: String) {
             this.mTxtBoxProyecto.text = _Proyecto
 
         }
 
-        fun setHora(_Hora: String)
-        {
+        fun setHora(_Hora: String) {
             this.mTxtBoxHora.text = _Hora
         }
 
-        fun setAsunto(_Asunto: String)
-        {
+        fun setAsunto(_Asunto: String) {
             this.mTxtBoxAsunto.text = _Asunto
         }
 
-        fun setCorrelativo(_Correlativo: Int){
+        fun setCorrelativo(_Correlativo: Int) {
             this.mCorrelativo = _Correlativo
         }
     }

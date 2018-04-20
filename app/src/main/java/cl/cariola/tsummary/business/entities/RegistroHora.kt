@@ -1,6 +1,7 @@
 package cl.cariola.tsummary.business.entities
 import android.database.Cursor
 import cl.cariola.tsummary.provider.TSContract
+import java.text.SimpleDateFormat
 import java.util.Date
 
 class RegistroHora {
@@ -49,10 +50,11 @@ class RegistroHora {
 
         this.mProyecto = Proyecto(0, "", cliente,1, Date())
         this.mProyecto?.nombre = cursor.getString(cursor.getColumnIndex(TSContract.Proyecto.COL_NOMBRE))
-
         this.mAsunto = cursor.getString(cursor.getColumnIndex(TSContract.RegistroHora.COL_TIM_ASUNTO))
 
-
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        this.mFechaIng = dateFormat.parse(cursor.getString(cursor.getColumnIndex(TSContract.RegistroHora.COL_FECHA_ING)))
+        this.mFechaUpdate = dateFormat.parse(cursor.getString(cursor.getColumnIndex(TSContract.RegistroHora.COL_FECHA_ULT_MOD)))
         this.mHoraTotal.horas = cursor.getInt(cursor.getColumnIndex(TSContract.RegistroHora.COL_TIM_HORAS))
         this.mHoraTotal.minutos = cursor.getInt(cursor.getColumnIndex(TSContract.RegistroHora.COL_TIM_MINUTOS))
 
