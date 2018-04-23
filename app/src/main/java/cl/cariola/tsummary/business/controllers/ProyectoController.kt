@@ -28,13 +28,12 @@ class ProyectoController(context: Context) {
         return this.mDB.getListProyectos()
     }
 
-    fun save(id: Int, correlativo: Int, proyectoId: Int, abogadoId: Int, asunto: String, startDate: String, hours: Int, minutes: Int, startHours: Int, startMinutes: Int) {
+    fun save (id: Int, correlativo: Int, proyectoId: Int, abogadoId: Int, asunto: String, startDate: String, hours: Int, minutes: Int, startHours: Int, startMinutes: Int) {
         var registro: RegistroHora
-        if (id != 0) {
-            registro = this.mDB.getRegistroHoraById(id)!!
+        if (id != 0 && correlativo != 0) {
+            registro = this.mDB.getRegistroHoraById(correlativo)!!
         } else {
             registro = RegistroHora()
-            registro.mId = id
             registro.mCorrelativo = correlativo
         }
 
@@ -44,13 +43,13 @@ class ProyectoController(context: Context) {
         registro.mHoraTotal = Hora(hours, minutes)
         registro.mOffLine = true
 
-        val sFormat = SimpleDateFormat()
+        val sFormat = SimpleDateFormat("yyyy-MM-dd")
         val dtFecha = sFormat.parse(startDate)
         dtFecha.hours = startHours
         dtFecha.minutes = startMinutes
         registro.mFechaIng = dtFecha
 
-        if (registro.mId == 0) {
+        if (registro.mCorrelativo  == 0) {
             registro.mFechaInsert = Date()
             registro.mFechaUpdate = Date()
             registro.mEstado = Estados.NUEVO
@@ -61,12 +60,14 @@ class ProyectoController(context: Context) {
             this.mDB.updateRegistroHora(registro)
         }
 
+        /*
         val sesionLocal = this.mDB.getSesionLocalById(abogadoId)!!
         if (!sesionLocal.isExpired()) {
             ApiClient.save(registro, sesionLocal.authToken)
             registro.mEstado = Estados.ANTIGUO
             this.mDB.updateRegistroHora(registro)
         }
+        */
     }
 
     fun delete(id: Int) {

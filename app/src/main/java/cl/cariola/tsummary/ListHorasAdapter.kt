@@ -23,7 +23,8 @@ class ListHorasAdapter(val cursor: Cursor, context: Context) : RecyclerView.Adap
 
             this.mItems.moveToPosition(pos)
             var intent = Intent(this.mContext, RegistrarHoraActivity::class.java)
-            intent.putExtra("registro", Gson().toJson(RegistroHora(this.mItems)))
+            val registro = RegistroHora(this.mItems)
+            intent.putExtra("registro", Gson().toJson(registro))
             this.mContext.startActivity(intent)
         }
     }

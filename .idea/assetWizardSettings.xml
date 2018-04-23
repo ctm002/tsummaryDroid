@@ -34,8 +34,8 @@
                                   <option name="values">
                                     <map>
                                       <entry key="assetType" value="IMAGE" />
-                                      <entry key="imageAsset" value="$USER_HOME$/Downloads/calendar/drawable-xxxhdpi/ic_calendar_black_36dp.png" />
-                                      <entry key="outputName" value="ic_calendar" />
+                                      <entry key="imageAsset" value="$USER_HOME$/Downloads/ic_add_white_24dp/android/drawable-mdpi/ic_add_white_24dp.png" />
+                                      <entry key="outputName" value="ic_add" />
                                       <entry key="theme" value="HOLO_DARK" />
                                     </map>
                                   </option>

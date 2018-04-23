@@ -152,7 +152,7 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
     fun insertRegistroHora(registro: RegistroHora): Boolean
     {
         val db = this.writableDatabase
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+
         var values = ContentValues()
         values.put(TbHora.COL_TIM_CORREL, registro.mCorrelativo)
         values.put(TbHora.COL_PRO_ID, registro.mProyectoId)
@@ -163,9 +163,13 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
         values.put(TbHora.COL_MODIFICABLE, registro.mModificable)
         values.put(TbHora.COL_OFFLINE, registro.mOffLine)
         values.put(TbHora.COL_ESTADO, registro.mEstado.value)
-        values.put(TbHora.COL_FECHA_ING, dateFormat.format(registro.mFechaInsert))
-        values.put(TbHora.COL_FECHA_ULT_MOD, dateFormat.format(registro.mFechaUpdate))
-        values.put(TbHora.COL_FECHA_HORA_INICIO, dateFormat.format(registro.mFechaIng))
+
+        val dateFormat1 = SimpleDateFormat("yyyy-MM-dd")
+        values.put(TbHora.COL_FECHA_ING, dateFormat1.format(registro.mFechaIng))
+
+        val dateFormat2 = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        values.put(TbHora.COL_FECHA_ULT_MOD, dateFormat2.format(registro.mFechaUpdate))
+        values.put(TbHora.COL_FECHA_HORA_INICIO, dateFormat2.format(registro.mFechaIng))
         db.insert(TbHora.TABlE_NAME, null, values)
         db.close()
         return true
@@ -311,7 +315,7 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
     fun getRegistroHoraById(id: Int): RegistroHora?
     {
         val db = this.writableDatabase
-        val query = "SELECT * FROM ${TbHora.TABlE_NAME} WHERE ${TbHora.COL_ID}=$id"
+        val query = "SELECT * FROM ${TbHora.TABlE_NAME} WHERE ${TbHora.COL_TIM_CORREL}=$id"
         val cursor = db.rawQuery(query, null)
 
         var registro: RegistroHora? = null
