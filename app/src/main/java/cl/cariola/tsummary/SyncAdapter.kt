@@ -5,6 +5,7 @@ import android.accounts.AccountManager
 import android.content.*
 import android.os.Bundle
 import android.util.Log
+import cl.cariola.tsummary.business.entities.SesionLocal
 import cl.cariola.tsummary.data.ApiClient
 import cl.cariola.tsummary.provider.TSContract
 import java.text.SimpleDateFormat
@@ -49,8 +50,9 @@ class SyncAdapter: AbstractThreadedSyncAdapter
     private fun syncNewsRegistroHora(authToken: String)
     {
         Log.i(TAG, "Fetching local entries...")
+        val sesionLocal = SesionLocal(authToken)
         var batch = ArrayList<ContentProviderOperation>()
-        val listRegistroHoras = ApiClient.getListHoursV2(20, "2018-04-01", "2018-05-01", authToken)
+        val listRegistroHoras = ApiClient.getListHoursV2(sesionLocal.getIdAbogado(), "2018-04-01", "2018-05-01", authToken)
         if (listRegistroHoras != null) {
             var c = this.mContentResolver.query(TSContract.RegistroHora.CONTENT_URI, TSContract.RegistroHora.PROJECTION_REGISTRO_HORA, null, null, "")
             assert(c != null)

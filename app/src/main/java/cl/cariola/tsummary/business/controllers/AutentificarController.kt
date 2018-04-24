@@ -34,10 +34,10 @@ class AutentificarController(context: Context){
         {
             if (sesionLocal.isExpired())
             {
-                sesionLocal = ApiClient.getNewToken(imei)
                 this.mDB.updateSesionLocal(sesionLocal!!)
             }
         }
         return sesionLocal
     }
+
 }

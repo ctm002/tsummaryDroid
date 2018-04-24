@@ -1,5 +1,7 @@
 package cl.cariola.tsummary.business.entities
 
+import java.text.SimpleDateFormat
+
 class Hora
 {
     var horas: Int = 0
@@ -15,11 +17,10 @@ class Hora
     {
         if (!_fecha.isNullOrBlank() || !_fecha.isNullOrEmpty()) {
 
-            var arFecha = _fecha.split(":")
-            if (arFecha.size == 2) {
-                horas = arFecha.get(0).toInt()
-                minutos = arFecha.get(1).toInt()
-            }
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+            val dtInicio = dateFormat.parse(_fecha)
+            horas = dtInicio.hours
+            minutos = dtInicio.minutes
         }
     }
 }

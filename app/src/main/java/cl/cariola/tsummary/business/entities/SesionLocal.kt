@@ -26,6 +26,12 @@ class SesionLocal {
         this.id = _id
     }
 
+    constructor(_AuthToken: String)
+    {
+        this.authToken = _AuthToken
+        this.jwt = JWT(this.authToken)
+    }
+
     fun getExpiredAt() = jwt.expiresAt!!
 
     fun isExpired(): Boolean

@@ -20,6 +20,10 @@ import java.util.*
 
 
 class SchedulerActivity : AppCompatActivity(), AsyncResponse {
+    override fun onStart() {
+        super.onStart()
+        loadItems()
+    }
 
     lateinit var recyclerView : RecyclerView
 
@@ -39,7 +43,6 @@ class SchedulerActivity : AppCompatActivity(), AsyncResponse {
 
     override fun onCreate(savedInstanceState: Bundle?)
     {
-
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_scheduler)
 
@@ -50,7 +53,7 @@ class SchedulerActivity : AppCompatActivity(), AsyncResponse {
         this.startDate = dateFormat.parse(bundle.getString("fecha"))
         this.idAbogado = bundle.getInt("idAbogado")!!
 
-        loadItems()
+        //loadItems()
 
         btnAdd = findViewById(R.id.btnAdd)
         btnAdd.setOnClickListener {
@@ -61,7 +64,7 @@ class SchedulerActivity : AppCompatActivity(), AsyncResponse {
             registro.mEstado = Estados.NUEVO
             registro.mFechaIng = this.startDate
 
-            val formatDate = SimpleDateFormat("HH:mm")
+            val formatDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
             val strHora =  formatDate.format(Date())
             registro.mInicio = Hora(strHora)
 
@@ -83,7 +86,11 @@ class SchedulerActivity : AppCompatActivity(), AsyncResponse {
         //var selectionArgs  = arrayOf<String>(this.idAbogado.toString(),  this.dateFormat.format(this.startDate))
         var selectionArgs  = arrayOf<String>(this.idAbogado.toString())
         val contentResolver = this.contentResolver
-        val cursor = this.contentResolver.query(TSContract.RegistroHora.CONTENT_URI, TSContract.RegistroHora.PROJECTION_REGISTRO_HORA_PROYECTO , selection, selectionArgs, "")
+        val cursor = this.contentResolver.query(TSContract.RegistroHora.CONTENT_URI,
+                TSContract.RegistroHora.PROJECTION_REGISTRO_HORA_PROYECTO,
+                selection,
+                selectionArgs,
+                " p.${TSContract.RegistroHora.COL_PRO_ID} ASC, ${TSContract.RegistroHora.COL_FECHA_HORA_INICIO} ASC" )
         Log.d(TAG, cursor.count.toString())
         val adapter = ListHorasAdapter(cursor, this)
         this.recyclerView.adapter = adapter
@@ -99,5 +106,6 @@ class SchedulerActivity : AppCompatActivity(), AsyncResponse {
         Toast.makeText(this, item?.itemId.toString(), Toast.LENGTH_LONG).show()
         return true
     }
+
 }
 

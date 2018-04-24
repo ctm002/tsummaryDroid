@@ -1,5 +1,6 @@
 package cl.cariola.tsummary
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.os.AsyncTask
@@ -12,6 +13,10 @@ import android.accounts.AccountManager
 import android.content.ContentResolver
 import android.accounts.Account
 import android.accounts.AccountAuthenticatorActivity
+import android.content.pm.PackageManager
+import android.support.v4.app.ActivityCompat
+import android.support.v4.content.ContextCompat
+import android.telephony.TelephonyManager
 import android.util.Log
 import android.view.View
 import android.widget.ProgressBar
@@ -51,6 +56,7 @@ class RegistrarCuentaActivity : AccountAuthenticatorActivity() {
     var mIMEI: String? = null
     var task: RegistrarCuentaTask? = null
     lateinit var mProgressBar: ProgressBar
+    private val RECORD_REQUEST_CODE = 101
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,6 +91,7 @@ class RegistrarCuentaActivity : AccountAuthenticatorActivity() {
         this.mProgressBar.isIndeterminate = true
         this.mProgressBar.visibility = View.GONE
 
+        setupPermissions()
     }
 
     fun sendData() {
@@ -96,8 +103,6 @@ class RegistrarCuentaActivity : AccountAuthenticatorActivity() {
         task?.messages = "Descargando datos..."
         task?.actions = Acciones.INITIAL
         task?.execute()
-
-
     }
 
     fun resetData() {
@@ -138,6 +143,8 @@ class RegistrarCuentaActivity : AccountAuthenticatorActivity() {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd")
         intent.putExtra("fecha", dateFormat.format(Date()))
         val sesionLocal = SesionLocal(authToken, this.mIMEI!!)
+
+
         intent.putExtra("idAbogado", sesionLocal.getIdAbogado())
         startActivity(intent)
     }
@@ -149,6 +156,36 @@ class RegistrarCuentaActivity : AccountAuthenticatorActivity() {
         if (success) {
             if (!mConfirmCredentials) {
                 finishLogin(authToken!!)
+            }
+        }
+    }
+
+    private fun setupPermissions() {
+        val permission = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE)
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            Log.i(TAG, "Permission to record denied")
+            makeRequest()
+        } else {
+            val telephonyManager = getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+            this.mIMEI = telephonyManager.deviceId
+        }
+    }
+
+    private fun makeRequest() {
+        ActivityCompat.requestPermissions(this,
+                arrayOf(Manifest.permission.READ_PHONE_STATE),
+                RECORD_REQUEST_CODE)
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+        when (requestCode) {
+            RECORD_REQUEST_CODE -> {
+
+                if (grantResults.isEmpty() || grantResults[0] != PackageManager.PERMISSION_GRANTED) {
+                    Log.i(TAG, "Permission has been denied by user")
+                } else {
+                    Log.i(TAG, "Permission has been granted by user")
+                }
             }
         }
     }
@@ -189,5 +226,4 @@ class RegistrarCuentaActivity : AccountAuthenticatorActivity() {
             onAuthenticationResult(result)
         }
     }
-
 }

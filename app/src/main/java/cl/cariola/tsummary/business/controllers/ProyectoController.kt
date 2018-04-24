@@ -1,10 +1,18 @@
 package cl.cariola.tsummary.business.controllers
+
+import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
+import android.support.v4.app.ActivityCompat
 import cl.cariola.tsummary.business.entities.*
 import cl.cariola.tsummary.data.ApiClient
 import cl.cariola.tsummary.data.DataBaseHandler
 import java.text.SimpleDateFormat
 import java.util.*
+import android.telephony.TelephonyManager
+
 
 class ProyectoController(context: Context) {
 
@@ -28,10 +36,11 @@ class ProyectoController(context: Context) {
         return this.mDB.getListProyectos()
     }
 
-    fun save (id: Int, correlativo: Int, proyectoId: Int, abogadoId: Int, asunto: String, startDate: String, hours: Int, minutes: Int, startHours: Int, startMinutes: Int) {
+    fun save(id: Int, correlativo: Int, proyectoId: Int, abogadoId: Int, asunto: String,
+             startDate: String, hours: Int, minutes: Int, startHours: Int, startMinutes: Int) {
         var registro: RegistroHora
-        if (id != 0 && correlativo != 0) {
-            registro = this.mDB.getRegistroHoraById(correlativo)!!
+        if (id != 0) {
+            registro = this.mDB.getRegistroHoraById(id)!!
         } else {
             registro = RegistroHora()
             registro.mCorrelativo = correlativo
@@ -48,26 +57,25 @@ class ProyectoController(context: Context) {
         dtFecha.hours = startHours
         dtFecha.minutes = startMinutes
         registro.mFechaIng = dtFecha
+        registro.mFechaUpdate = Date()
 
-        if (registro.mCorrelativo  == 0) {
+        if (registro.mId == 0) {
             registro.mFechaInsert = Date()
-            registro.mFechaUpdate = Date()
             registro.mEstado = Estados.NUEVO
             this.mDB.insertRegistroHora(registro)
         } else {
             registro.mFechaUpdate = Date()
-            registro.mEstado = Estados.EDITADO
+
+            registro.mEstado = if (registro.mCorrelativo == 0) Estados.NUEVO else Estados.EDITADO
             this.mDB.updateRegistroHora(registro)
         }
 
-        /*
-        val sesionLocal = this.mDB.getSesionLocalById(abogadoId)!!
+        val sesionLocal = this.mDB.getSesionLocalByIdAbogado(abogadoId)!!
         if (!sesionLocal.isExpired()) {
             ApiClient.save(registro, sesionLocal.authToken)
             registro.mEstado = Estados.ANTIGUO
             this.mDB.updateRegistroHora(registro)
         }
-        */
     }
 
     fun delete(id: Int) {
