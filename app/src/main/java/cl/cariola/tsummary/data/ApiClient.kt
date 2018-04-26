@@ -229,7 +229,9 @@ object ApiClient
         var JSONObjectRequest = JSONObject()
         JSONObjectRequest.put("tim_correl", registro.mCorrelativo)
         JSONObjectRequest.put("pro_id", registro.mProyectoId)
-        JSONObjectRequest.put("tim_fecha_ing",  dateFormat.format(registro.mFechaIng))
+
+        val strDate = dateFormat.format(registro.mFechaIng)
+        JSONObjectRequest.put("tim_fecha_ing",  strDate)
         JSONObjectRequest.put("tim_asunto", registro.mAsunto)
         JSONObjectRequest.put("tim_horas", registro.mHoraTotal.horas)
         JSONObjectRequest.put("tim_minutos", registro.mHoraTotal.minutos)

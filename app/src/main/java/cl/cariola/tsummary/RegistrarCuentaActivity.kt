@@ -204,8 +204,8 @@ class RegistrarCuentaActivity : AccountAuthenticatorActivity() {
                 if (actions == Acciones.INITIAL) {
                     val autentificar = AutentificarController(mContext)
                     val sesionLocal = autentificar.register(mIMEI!!, mUsername!!, mPassword!!)
-                    if (sesionLocal?.authToken != "") {
-                        return sesionLocal?.authToken!!
+                    if (sesionLocal != null && !sesionLocal.authToken.isNullOrEmpty()) {
+                        return sesionLocal.authToken!!
                     } else {
                         return "FAIL"
                     }

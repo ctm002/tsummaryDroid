@@ -97,7 +97,14 @@ class RegistrarHoraActivity : AppCompatActivity() {
         val aListProyectos = this.projects.map { p -> "${p.cliente.nombre} ${p.nombre}" } as ArrayList<String>
         textAutocomplete.setAdapter(ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, aListProyectos))
         textAutocomplete.threshold = 2
-        textAutocomplete.setOnItemClickListener { parent, view, position, id -> this.itemSelected = this.projects.get(position) }
+        textAutocomplete.setOnItemClickListener { parent, view, position, id ->
+            val selected = parent.getItemAtPosition(position) as String
+            Log.d(TAG, selected)
+            val index = aListProyectos.indexOf(selected)
+            Log.d(TAG, index.toString())
+            this.itemSelected = this.projects.get(index)
+            Log.d(TAG, itemSelected.id.toString())
+        }
 
         setHorasTrabajos()
         setHorasInicio()
@@ -204,15 +211,13 @@ class RegistrarHoraActivity : AppCompatActivity() {
     private fun btnDeleteSetOnClickListener() {
         val btnEliminar = findViewById<Button>(R.id.btnResetData)
         btnEliminar.setOnClickListener {
-            val intent = Intent(this, SchedulerActivity::class.java)
-            val bundle = Bundle()
-            bundle.putString("fecha", this.startDate)
-            this.startActivity(intent)
+            val task = EliminarTask()
+            task.execute(this.id.toString())
         }
     }
 
-    inner class RegistrarTask() : AsyncTask<Void, Void, String>() {
-
+    inner class RegistrarTask() : AsyncTask<Void, Void, String>()
+    {
         override fun onPreExecute() {
             super.onPreExecute()
         }
@@ -241,6 +246,32 @@ class RegistrarHoraActivity : AppCompatActivity() {
 
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
+        }
+
+    }
+
+    inner class EliminarTask() : AsyncTask<String, Void, String>()
+    {
+        override fun onPostExecute(result: String?) {
+            super.onPostExecute(result)
+
+            val intent = Intent(mContext, SchedulerActivity::class.java)
+            val bundle = Bundle()
+            bundle.putString("fecha", startDate)
+            intent.putExtras(bundle)
+            setResult(0, intent)
+            finish()
+        }
+
+        override fun doInBackground(vararg params: String?): String {
+            val id = params.get(0)!!.toInt()
+            val controller = ProyectoController(mContext)
+            controller.delete(id)
+            return "OK"
+        }
+
+        override fun onPreExecute() {
+            super.onPreExecute()
         }
 
     }

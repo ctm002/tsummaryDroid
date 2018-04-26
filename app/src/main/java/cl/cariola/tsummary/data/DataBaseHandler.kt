@@ -1,4 +1,5 @@
 package cl.cariola.tsummary.data
+
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
@@ -7,7 +8,6 @@ import android.util.Log
 import cl.cariola.tsummary.business.entities.*
 import cl.cariola.tsummary.provider.TSContract
 import java.text.SimpleDateFormat
-
 
 val DATABASE_NAME = "tsummary.db"
 val DATABASE_VERSION = 1
@@ -28,8 +28,10 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
         val db = this.writableDatabase
         val sql =
                 """
-                INSERT OR IGNORE INTO ${TbUsuario.TABlE_NAME} (${TbUsuario.COL_IMEI}, ${TbUsuario.COL_TOKEN}, ${TbUsuario.COL_ID_ABOGADO})
-                VALUES ('${sesion.getIMEI()}', '${sesion.authToken}', ${sesion.getIdAbogado()})
+                INSERT OR IGNORE INTO ${TbUsuario.TABlE_NAME} (${TbUsuario.COL_IMEI}, ${TbUsuario.COL_TOKEN},
+                ${TbUsuario.COL_ID_ABOGADO}, ${TbUsuario.COL_LOGIN_NAME})
+                VALUES ('${sesion.getIMEI()}', '${sesion.authToken}',
+                ${sesion.getIdAbogado()}, '${sesion.getLoginName()}')
             """.trimIndent()
         db.execSQL(sql)
         db.close()
@@ -40,13 +42,14 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
         val db = this.writableDatabase
         var values = ContentValues()
         values.put(TbUsuario.COL_TOKEN, sesion.authToken)
-        val returnValue = db.update(TbUsuario.TABlE_NAME, values, "${TbUsuario.COL_IMEI}=?", arrayOf(sesion.getIMEI()))
+        val returnValue = db.update(TbUsuario.TABlE_NAME, values,
+                "${TbUsuario.COL_IMEI}=? AND ${TbUsuario.COL_ID_ABOGADO}=?",
+                arrayOf(sesion.getIMEI(), sesion.getIdAbogado().toString()))
         db.close()
         return returnValue
     }
 
-    fun getSesionLocalById(id: Int): SesionLocal?
-    {
+    fun getSesionLocalById(id: Int): SesionLocal? {
         val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
         val db = this.readableDatabase
         val query = "SELECT * FROM ${TbUsuario.TABlE_NAME} WHERE ${TbUsuario.COL_ID}=$id"
@@ -63,12 +66,11 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
         return sesionLocal
     }
 
-    fun getSesionLocalByIMEI(imei: String): SesionLocal?
-    {
-        val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-
+    fun getSesionLocalByIMEI(imei: String, loginName: String): SesionLocal? {
         val db = this.readableDatabase
-        val query = "SELECT * FROM ${TbUsuario.TABlE_NAME} WHERE ${TbUsuario.COL_TOKEN}=$imei"
+        val query =
+                " SELECT * FROM ${TbUsuario.TABlE_NAME} " +
+                        " WHERE ${TbUsuario.COL_IMEI}='$imei' AND ${TbUsuario.COL_LOGIN_NAME}='$loginName'"
         val cursor = db.rawQuery(query, null)
 
         var sesionLocal: SesionLocal? = null
@@ -76,16 +78,13 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
             val id = cursor.getInt(cursor.getColumnIndex(TbUsuario.COL_ID))
             val imei = cursor.getString(cursor.getColumnIndex(TbUsuario.COL_IMEI))
             val token = cursor.getString(cursor.getColumnIndex(TbUsuario.COL_TOKEN))
-            sesionLocal = SesionLocal(imei, token, id)
+            sesionLocal = SesionLocal(token, imei, id)
         }
         db.close()
         return sesionLocal
     }
 
-    fun getSesionLocalByIdAbogado(id: Int): SesionLocal?
-    {
-        val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-
+    fun getSesionLocalByIdAbogado(id: Int): SesionLocal? {
         val db = this.readableDatabase
         val query = "SELECT * FROM ${TbUsuario.TABlE_NAME} WHERE ${TbUsuario.COL_ID_ABOGADO}=$id"
         val cursor = db.rawQuery(query, null)
@@ -101,8 +100,7 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
         return sesionLocal
     }
 
-    fun insertListProyectos(proyectos: List<Proyecto>): Boolean
-    {
+    fun insertListProyectos(proyectos: List<Proyecto>): Boolean {
         val db = this.writableDatabase
         for (item in proyectos) {
             val sql = """INSERT OR IGNORE INTO ${TbProyecto.TABlE_NAME}
@@ -121,8 +119,7 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
         return true
     }
 
-    fun insertListRegistroHora(registros: List<RegistroHora>): Boolean
-    {
+    fun insertListRegistroHora(registros: List<RegistroHora>): Boolean {
         val db = this.writableDatabase
 
 
@@ -150,8 +147,7 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
         return true
     }
 
-    fun updateRegistroHora(registro: RegistroHora): Boolean
-    {
+    fun updateRegistroHora(registro: RegistroHora): Boolean {
         val db = this.writableDatabase
         var values = ContentValues()
         values.put(TbHora.COL_TIM_CORREL, registro.mCorrelativo)
@@ -165,12 +161,13 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
         values.put(TbHora.COL_OFFLINE, registro.mOffLine)
         values.put(TbHora.COL_ESTADO, registro.mEstado.value)
 
-        val dateFormat1 = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        val dateFormat1 = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
         values.put(TbHora.COL_FECHA_ULT_MOD, dateFormat1.format(registro.mFechaUpdate))
-        values.put(TbHora.COL_FECHA_HORA_INICIO, dateFormat1.format(registro.mFechaIng))
 
-        val dateFormat2 = SimpleDateFormat("yyyy-MM-dd")
-        values.put(TbHora.COL_FECHA_ING, dateFormat2.format(registro.mFechaIng))
+        values.put(TbHora.COL_FECHA_HORA_INICIO, "${registro.mInicio.horas}:${registro.mInicio.minutos}")
+
+        val dateFormat3 = SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss")
+        values.put(TbHora.COL_FECHA_ING, dateFormat3.format(registro.mFechaIng))
 
         val args = arrayOf<String>(registro.mId.toString())
         db.update(TbHora.TABlE_NAME, values, "${TbHora.COL_ID}=?", args)
@@ -178,8 +175,7 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
         return true
     }
 
-    fun insertRegistroHora(registro: RegistroHora): Boolean
-    {
+    fun insertRegistroHora(registro: RegistroHora): Boolean {
         val db = this.writableDatabase
 
         var values = ContentValues()
@@ -193,19 +189,19 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
         values.put(TbHora.COL_OFFLINE, registro.mOffLine)
         values.put(TbHora.COL_ESTADO, registro.mEstado.value)
 
-        val dateFormat1 = SimpleDateFormat("yyyy-MM-dd")
+        val dateFormat1 = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
         values.put(TbHora.COL_FECHA_ING, dateFormat1.format(registro.mFechaIng))
 
-        val dateFormat2 = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        val dateFormat2 = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
         values.put(TbHora.COL_FECHA_ULT_MOD, dateFormat2.format(registro.mFechaUpdate))
-        values.put(TbHora.COL_FECHA_HORA_INICIO, dateFormat2.format(registro.mFechaIng))
+
+        values.put(TbHora.COL_FECHA_HORA_INICIO, "${registro.mInicio.horas}:${registro.mInicio.minutos}")
         db.insert(TbHora.TABlE_NAME, null, values)
         db.close()
         return true
     }
 
-    fun getListRegistroHoraByCodigoAndFecha(codigo: Int, fecha: String): List<RegistroHora>
-    {
+    fun getListRegistroHoraByCodigoAndFecha(codigo: Int, fecha: String): List<RegistroHora> {
         val formatter = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
         val db = this.readableDatabase
         val query = " SELECT " +
@@ -261,8 +257,7 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
         return items
     }
 
-    fun getListRegistroHoraByIdAbogadoAndEstadoOffline(codigo: Int): List<RegistroHora>?
-    {
+    fun getListRegistroHoraByIdAbogadoAndEstadoOffline(codigo: Int): List<RegistroHora>? {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 
         val db = this.readableDatabase
@@ -316,8 +311,7 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
         return items
     }
 
-    fun getListProyectos(): List<Proyecto>
-    {
+    fun getListProyectos(): List<Proyecto> {
         val db = this.writableDatabase
         val query = "SELECT * FROM ${TbProyecto.TABlE_NAME} "
         val cursor = db.rawQuery(query, null)
@@ -341,8 +335,7 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
         return proyectos
     }
 
-    fun getRegistroHoraById(id: Int): RegistroHora?
-    {
+    fun getRegistroHoraById(id: Int): RegistroHora? {
         val db = this.readableDatabase
         val query = "SELECT * FROM ${TbHora.TABlE_NAME} WHERE ${TbHora.COL_ID}=$id"
         val cursor = db.rawQuery(query, null)
@@ -350,30 +343,28 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
         var registro: RegistroHora? = null
         cursor.moveToFirst()
 
-        if (!cursor.isAfterLast)
-        {
+        if (!cursor.isAfterLast) {
             registro = RegistroHora()
             registro.mCorrelativo = cursor.getInt(cursor.getColumnIndex(TbHora.COL_TIM_CORREL))
             registro.mId = cursor.getInt(cursor.getColumnIndex(TbHora.COL_ID))
             registro.mEstado = Estados.from(cursor.getInt(cursor.getColumnIndex(TbHora.COL_ESTADO)))
+            registro.mAbogadoId = cursor.getInt(cursor.getColumnIndex(TbHora.COL_ABO_ID))
         }
         db.close()
         return registro
     }
 
-    fun deleteRegistro(registro: RegistroHora?)
-    {
+    fun deleteRegistro(registro: RegistroHora?) {
         val db = this.writableDatabase
         var strFecha = SimpleDateFormat().format(registro?.mFechaUpdate).format("yyyy-MM-dd HH:mm:ss")
         val query = "UPDATE ${TbHora.TABlE_NAME} " +
-                "   SET ${TbHora.COL_ESTADO}=${registro?.mEstado?.value}, ${TbHora.COL_FECHA_ULT_MOD}=$strFecha" +
+                "   SET ${TbHora.COL_ESTADO}=${registro?.mEstado?.value}, ${TbHora.COL_FECHA_ULT_MOD}='$strFecha'" +
                 "   WHERE ${TbHora.COL_ID}=${registro?.mId}"
         db.execSQL(query)
         db.close()
     }
 
-    fun resetTables()
-    {
+    fun resetTables() {
         val db = this.writableDatabase
         val sql = """
                 DELETE FROM ${TbHora.TABlE_NAME};
@@ -384,16 +375,14 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
         db.close()
     }
 
-    fun deleteListRegistroHora()
-    {
+    fun deleteListRegistroHora() {
         val db = this.writableDatabase
         val sql = "DELETE FROM ${TbHora.TABlE_NAME}"
         db.execSQL(sql)
         db.close()
     }
 
-    fun deleteListProyectos()
-    {
+    fun deleteListProyectos() {
         val db = this.writableDatabase
         val sql = "DELETE FROM ${TbProyecto.TABlE_NAME}"
         db.execSQL(sql)

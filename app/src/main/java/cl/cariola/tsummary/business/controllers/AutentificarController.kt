@@ -21,7 +21,7 @@ class AutentificarController(context: Context){
 
     fun register(imei: String, loginName: String, password: String): SesionLocal?
     {
-        var sesionLocal = this.mDB.getSesionLocalByIMEI(imei)
+        var sesionLocal = this.mDB.getSesionLocalByIMEI(imei, loginName)
         if (sesionLocal == null)
         {
             sesionLocal = ApiClient.register(imei, loginName, password)

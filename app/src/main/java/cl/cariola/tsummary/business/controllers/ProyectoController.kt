@@ -54,10 +54,9 @@ class ProyectoController(context: Context) {
 
         val sFormat = SimpleDateFormat("yyyy-MM-dd")
         val dtFecha = sFormat.parse(startDate)
-        dtFecha.hours = startHours
-        dtFecha.minutes = startMinutes
         registro.mFechaIng = dtFecha
         registro.mFechaUpdate = Date()
+        registro.mInicio = Hora(startHours, startMinutes)
 
         if (registro.mId == 0) {
             registro.mFechaInsert = Date()
@@ -65,30 +64,28 @@ class ProyectoController(context: Context) {
             this.mDB.insertRegistroHora(registro)
         } else {
             registro.mFechaUpdate = Date()
-
             registro.mEstado = if (registro.mCorrelativo == 0) Estados.NUEVO else Estados.EDITADO
             this.mDB.updateRegistroHora(registro)
         }
 
         val sesionLocal = this.mDB.getSesionLocalByIdAbogado(abogadoId)!!
-        if (!sesionLocal.isExpired()) {
-            ApiClient.save(registro, sesionLocal.authToken)
-            registro.mEstado = Estados.ANTIGUO
-            this.mDB.updateRegistroHora(registro)
-        }
+        //if (!sesionLocal.isExpired()) {
+        ApiClient.save(registro, sesionLocal.authToken)
+        registro.mEstado = Estados.ANTIGUO
+        registro.mOffLine = false
+        this.mDB.updateRegistroHora(registro)
+        //}
     }
 
     fun delete(id: Int) {
         var registro = this.mDB.getRegistroHoraById(id)
         if (registro != null) {
-            val sesionLocal = this.mDB.getSesionLocalById(registro.mAbogadoId)
-            if (sesionLocal != null && sesionLocal.isExpired()) {
-
+            val sesionLocal = this.mDB.getSesionLocalByIdAbogado(registro.mAbogadoId)
+            if (sesionLocal != null && !sesionLocal.isExpired()) {
                 registro.mOffLine = true
                 registro.mEstado = Estados.ELIMINADO
                 registro.mFechaUpdate = Date()
                 ApiClient.delete(registro, sesionLocal.authToken)
-                registro.mEstado = Estados.ANTIGUO
                 this.mDB.deleteRegistro(registro)
             }
         }

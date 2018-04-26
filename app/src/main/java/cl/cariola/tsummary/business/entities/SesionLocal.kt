@@ -53,6 +53,5 @@ class SesionLocal {
     {
         fun create() = SesionLocal()
     }
-
 }
 

@@ -1,4 +1,5 @@
 package cl.cariola.tsummary
+
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -25,24 +26,22 @@ class SchedulerActivity : AppCompatActivity(), AsyncResponse {
         loadItems()
     }
 
-    lateinit var recyclerView : RecyclerView
+    lateinit var recyclerView: RecyclerView
 
     lateinit var btnAdd: FloatingActionButton
     val dateFormat = SimpleDateFormat("yyyy-MM-dd")
     val TAG = "SchedulerActivity"
 
-    lateinit var startDate : Date
-    var idAbogado : Int = 0
+    lateinit var startDate: Date
+    var idAbogado: Int = 0
 
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean
-    {
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_scheduler, menu)
         return super.onCreateOptionsMenu(menu)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?)
-    {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_scheduler)
 
@@ -64,45 +63,38 @@ class SchedulerActivity : AppCompatActivity(), AsyncResponse {
             registro.mEstado = Estados.NUEVO
             registro.mFechaIng = this.startDate
 
-            val formatDate = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-            val strHora =  formatDate.format(Date())
-            registro.mInicio = Hora(strHora)
-
+            val date = Date()
+            registro.mInicio = Hora(date.hours, date.minutes)
 
             val gson = Gson()
             var intent = Intent(this, RegistrarHoraActivity::class.java)
             intent.putExtra("registro", gson.toJson(registro))
-            startActivityForResult(intent,  0)
+            startActivityForResult(intent, 0)
             //startActivity(intent)
         }
 
         supportActionBar?.setDisplayHomeAsUpEnabled(false)
     }
 
-    private fun loadItems()
-    {
-        //val selection = "${TSContract.RegistroHora.COL_ABO_ID}=? AND strftime('%Y-%m-%d',${TSContract.RegistroHora.COL_FECHA_ING})=?"
-        val selection = "${TSContract.RegistroHora.COL_ABO_ID}=?"
-        //var selectionArgs  = arrayOf<String>(this.idAbogado.toString(),  this.dateFormat.format(this.startDate))
-        var selectionArgs  = arrayOf<String>(this.idAbogado.toString())
+    private fun loadItems() {
+        val selection = "${TSContract.RegistroHora.COL_ABO_ID}=? AND r.${TSContract.RegistroHora.COL_ESTADO}!=?"
+        var selectionArgs = arrayOf<String>(this.idAbogado.toString(), Estados.ELIMINADO.value.toString())
         val contentResolver = this.contentResolver
         val cursor = this.contentResolver.query(TSContract.RegistroHora.CONTENT_URI,
                 TSContract.RegistroHora.PROJECTION_REGISTRO_HORA_PROYECTO,
                 selection,
                 selectionArgs,
-                " p.${TSContract.RegistroHora.COL_PRO_ID} ASC, ${TSContract.RegistroHora.COL_FECHA_HORA_INICIO} ASC" )
+                " p.${TSContract.RegistroHora.COL_PRO_ID} ASC, ${TSContract.RegistroHora.COL_FECHA_HORA_INICIO} ASC")
         Log.d(TAG, cursor.count.toString())
         val adapter = ListHorasAdapter(cursor, this)
         this.recyclerView.adapter = adapter
     }
 
-    override fun send(data: Any)
-    {
+    override fun send(data: Any) {
 
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean
-    {
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         Toast.makeText(this, item?.itemId.toString(), Toast.LENGTH_LONG).show()
         return true
     }
