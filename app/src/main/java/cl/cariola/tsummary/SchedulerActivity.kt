@@ -1,5 +1,6 @@
 package cl.cariola.tsummary
 
+import android.app.DatePickerDialog
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -10,6 +11,7 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.widget.CalendarView
 import android.widget.Toast
 import cl.cariola.tsummary.business.entities.Estados
 import cl.cariola.tsummary.business.entities.Hora
@@ -21,20 +23,13 @@ import java.util.*
 
 
 class SchedulerActivity : AppCompatActivity(), AsyncResponse {
-    override fun onStart() {
-        super.onStart()
-        loadItems()
-    }
 
     lateinit var recyclerView: RecyclerView
-
     lateinit var btnAdd: FloatingActionButton
-    val dateFormat = SimpleDateFormat("yyyy-MM-dd")
-    val TAG = "SchedulerActivity"
-
     lateinit var startDate: Date
     var idAbogado: Int = 0
-
+    val dateFormat = SimpleDateFormat("yyyy-MM-dd")
+    val TAG = "SchedulerActivity"
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_scheduler, menu)
@@ -52,8 +47,6 @@ class SchedulerActivity : AppCompatActivity(), AsyncResponse {
         this.startDate = dateFormat.parse(bundle.getString("fecha"))
         this.idAbogado = bundle.getInt("idAbogado")!!
 
-        //loadItems()
-
         btnAdd = findViewById(R.id.btnAdd)
         btnAdd.setOnClickListener {
             var registro = RegistroHora()
@@ -70,22 +63,26 @@ class SchedulerActivity : AppCompatActivity(), AsyncResponse {
             var intent = Intent(this, RegistrarHoraActivity::class.java)
             intent.putExtra("registro", gson.toJson(registro))
             startActivityForResult(intent, 0)
-            //startActivity(intent)
         }
 
         supportActionBar?.setDisplayHomeAsUpEnabled(false)
     }
 
-    private fun loadItems() {
-        val selection = "${TSContract.RegistroHora.COL_ABO_ID}=? AND r.${TSContract.RegistroHora.COL_ESTADO}!=?"
-        var selectionArgs = arrayOf<String>(this.idAbogado.toString(), Estados.ELIMINADO.value.toString())
+    override fun onStart() {
+        super.onStart()
+        loadItems(dateFormat.format(startDate))
+    }
+
+    private fun loadItems(_fecha: String) {
+        val selection = "${TSContract.RegistroHora.COL_ABO_ID}=? AND r.${TSContract.RegistroHora.COL_ESTADO}!=? " +
+                "AND strftime('%Y-%m-%d',${TSContract.RegistroHora.COL_FECHA_ING})=?"
+        var selectionArgs = arrayOf<String>(this.idAbogado.toString(), Estados.ELIMINADO.value.toString(), _fecha)
         val contentResolver = this.contentResolver
         val cursor = this.contentResolver.query(TSContract.RegistroHora.CONTENT_URI,
                 TSContract.RegistroHora.PROJECTION_REGISTRO_HORA_PROYECTO,
                 selection,
                 selectionArgs,
-                " p.${TSContract.RegistroHora.COL_PRO_ID} ASC, ${TSContract.RegistroHora.COL_FECHA_HORA_INICIO} ASC")
-        Log.d(TAG, cursor.count.toString())
+                "${TSContract.RegistroHora.COL_FECHA_HORA_INICIO} ASC, p.${TSContract.RegistroHora.COL_PRO_ID} ASC")
         val adapter = ListHorasAdapter(cursor, this)
         this.recyclerView.adapter = adapter
     }
@@ -95,9 +92,23 @@ class SchedulerActivity : AppCompatActivity(), AsyncResponse {
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        Toast.makeText(this, item?.itemId.toString(), Toast.LENGTH_LONG).show()
-        return true
-    }
 
+        val c = Calendar.getInstance()
+        val year = c.get(Calendar.YEAR)
+        val month = c.get(Calendar.MONTH)
+        val day = c.get(Calendar.DAY_OF_MONTH)
+
+        var dpDialog = DatePickerDialog(this, DatePickerDialog.OnDateSetListener
+        { view, year, month, day ->
+            val monthTemp = month + 1
+            val strFecha = "${year}-${String.format("%02d", monthTemp)}-${String.format("%02d", day)}"
+            this.loadItems(strFecha)
+            this.startDate = dateFormat.parse(strFecha)
+        }, year, month, day)
+        dpDialog.show()
+
+        return true
+
+    }
 }
 

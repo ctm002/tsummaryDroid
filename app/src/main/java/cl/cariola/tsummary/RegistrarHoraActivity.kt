@@ -2,6 +2,7 @@ package cl.cariola.tsummary
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.DatePickerDialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -12,12 +13,15 @@ import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.telephony.TelephonyManager
 import android.util.Log
+import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.*
 import cl.cariola.tsummary.business.controllers.ProyectoController
 import cl.cariola.tsummary.business.entities.Proyecto
 import cl.cariola.tsummary.business.entities.RegistroHora
 import com.google.gson.Gson
+import kotlinx.android.synthetic.main.activity_registrar_hora.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -56,6 +60,13 @@ class RegistrarHoraActivity : AppCompatActivity() {
         loadData(registro)
         setTitleBarTools()
         this.mContext = this
+
+        supportActionBar?.setDisplayHomeAsUpEnabled(false)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_scheduler, menu)
+        return super.onCreateOptionsMenu(menu)
     }
 
     private fun loadData(registro: RegistroHora) {
@@ -76,14 +87,29 @@ class RegistrarHoraActivity : AppCompatActivity() {
 
         if (registro.mProyecto != null) {
             this.itemSelected = registro.mProyecto!!
-            this.textAutocomplete.setText(registro.mProyecto?.nombre)
+            this.textAutocomplete.setText("${registro.getNombreCliente()} ${registro.mProyecto?.nombre}")
+            this.autoCompleteTextView.setSelection(this.textAutocomplete.text.length)
+        }
+
+        val aListProyectos = this.projects.map { p -> "${p.cliente.nombre} ${p.nombre}" } as ArrayList<String>
+        this.textAutocomplete.setAdapter(ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, aListProyectos))
+        this.textAutocomplete.threshold = 2
+        this.textAutocomplete.setOnItemClickListener { parent, view, position, id ->
+            val selected = parent.getItemAtPosition(position) as String
+            Log.d(TAG, selected)
+            val index = aListProyectos.indexOf(selected)
+            Log.d(TAG, index.toString())
+            this.itemSelected = this.projects.get(index)
+            Log.d(TAG, itemSelected.id.toString())
         }
     }
 
     private fun setTitleBarTools() {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd")
         val date = dateFormat.parse(startDate)
-        setTitle(dateFormat.format(date))
+
+        var styleFormat = SimpleDateFormat("E, d MMMM")
+        setTitle(styleFormat.format(date))
     }
 
     private fun initialize() {
@@ -92,19 +118,7 @@ class RegistrarHoraActivity : AppCompatActivity() {
         this.editTxtHorasTrab = findViewById(R.id.editTxtTrabHoras)
         this.editTxtMinTrab = findViewById(R.id.editTxtTrabMinutos)
         this.editTxtAsunto = findViewById(R.id.editTxtNotas)
-
-        textAutocomplete = findViewById<AutoCompleteTextView>(R.id.autoCompleteTextView)
-        val aListProyectos = this.projects.map { p -> "${p.cliente.nombre} ${p.nombre}" } as ArrayList<String>
-        textAutocomplete.setAdapter(ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, aListProyectos))
-        textAutocomplete.threshold = 2
-        textAutocomplete.setOnItemClickListener { parent, view, position, id ->
-            val selected = parent.getItemAtPosition(position) as String
-            Log.d(TAG, selected)
-            val index = aListProyectos.indexOf(selected)
-            Log.d(TAG, index.toString())
-            this.itemSelected = this.projects.get(index)
-            Log.d(TAG, itemSelected.id.toString())
-        }
+        this.textAutocomplete = findViewById<AutoCompleteTextView>(R.id.autoCompleteTextView)
 
         setHorasTrabajos()
         setHorasInicio()
@@ -185,10 +199,27 @@ class RegistrarHoraActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        /*
         var intent = Intent(this, SchedulerActivity::class.java)
         intent.putExtra("fecha", this.startDate)
         intent.putExtra("idAbogado", this.idAbogado)
         startActivity(intent)
+
+        */
+        val c = Calendar.getInstance()
+        val year = c.get(Calendar.YEAR)
+        val month = c.get(Calendar.MONTH)
+        val day = c.get(Calendar.DAY_OF_MONTH)
+
+        var dpDialog = DatePickerDialog(this, DatePickerDialog.OnDateSetListener
+        { view, year, month, day ->
+            val monthTemp = month + 1
+            val strFecha: String = "${year}-${String.format("%02d", monthTemp)}-${String.format("%02d", day)}"
+            this.startDate = strFecha
+            setTitleBarTools()
+        }, year, month, day)
+        dpDialog.show()
+
         return true
     }
 
@@ -216,42 +247,67 @@ class RegistrarHoraActivity : AppCompatActivity() {
         }
     }
 
-    inner class RegistrarTask() : AsyncTask<Void, Void, String>()
-    {
+    fun isValid(): Boolean {
+        val hours: String = editTxtHorasTrab.text.toString()
+        val minutes: String = editTxtMinTrab.text.toString()
+
+        if (hours == "0" && minutes == "0") return false
+
+        if (hours.isNullOrBlank() && minutes.isNullOrBlank()) return false
+
+        if (hours.isNullOrEmpty() && minutes.isNullOrEmpty()) return false
+
+        return true
+
+
+    }
+
+    inner class RegistrarTask() : AsyncTask<Void, Void, String>() {
         override fun onPreExecute() {
             super.onPreExecute()
         }
 
         override fun doInBackground(vararg params: Void?): String {
-            val proyectoId: Int = itemSelected.id
-            val asunto: String = editTxtAsunto.text.toString()
-            val startHours: String = if (editTxtHorasIni.text.isNullOrEmpty()) "0" else editTxtHorasIni.text.toString()
-            val startMinutes: String = if (editTxtMinIni.text.isNullOrEmpty()) "0" else editTxtMinIni.text.toString()
+            try {
+                if (!(::itemSelected.isInitialized)) throw Exception("Proyecto no ingresado")
 
-            val hours: String = if (editTxtHorasTrab.text.isNullOrBlank()) "0" else editTxtHorasTrab.text.toString()
-            val minutes: String = if (editTxtMinTrab.text.isNullOrBlank()) "0" else editTxtMinTrab.text.toString()
+                if (!isValid()) throw Exception("Horas de trabajo no ingresadas")
 
-            val abogadoId = idAbogado
-            val controller = ProyectoController(mContext)
-            controller.save(id, correlativo, proyectoId, abogadoId, asunto, startDate, hours.toInt(), minutes.toInt(), startHours.toInt(), startMinutes.toInt())
+                val proyectoId: Int = itemSelected.id
+                val hours: String = editTxtHorasTrab.text.toString()
+                val minutes: String = editTxtMinTrab.text.toString()
+                val startHours: String = if (editTxtHorasIni.text.isNullOrEmpty()) "0" else editTxtHorasIni.text.toString()
+                val startMinutes: String = if (editTxtMinIni.text.isNullOrEmpty()) "0" else editTxtMinIni.text.toString()
+                val asunto: String = editTxtAsunto.text.toString()
+                if (asunto.isNullOrEmpty() || asunto.isNullOrBlank()) throw Exception("Asunto no ingresado")
 
-            val intent = Intent()
-            val bundle = Bundle()
-            bundle.putString("fecha", startDate)
-            intent.putExtras(bundle)
-            setResult(0, intent)
-            finish()
-            return "OK"
+                val abogadoId = idAbogado
+
+                val controller = ProyectoController(mContext)
+                controller.save(id, correlativo, proyectoId, abogadoId, asunto, startDate, hours.toInt(), minutes.toInt(), startHours.toInt(), startMinutes.toInt())
+                return "OK"
+            } catch (ex: Exception) {
+                return ex.message!!
+            }
         }
 
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
+            if (result.equals("OK")) {
+                val intent = Intent()
+                val bundle = Bundle()
+                bundle.putString("fecha", startDate)
+                intent.putExtras(bundle)
+                setResult(0, intent)
+                finish()
+            } else {
+                Toast.makeText(mContext, result, Toast.LENGTH_SHORT).show()
+            }
         }
 
     }
 
-    inner class EliminarTask() : AsyncTask<String, Void, String>()
-    {
+    inner class EliminarTask() : AsyncTask<String, Void, String>() {
         override fun onPostExecute(result: String?) {
             super.onPostExecute(result)
 

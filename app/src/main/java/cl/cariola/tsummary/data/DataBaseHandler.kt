@@ -8,6 +8,7 @@ import android.util.Log
 import cl.cariola.tsummary.business.entities.*
 import cl.cariola.tsummary.provider.TSContract
 import java.text.SimpleDateFormat
+import java.util.*
 
 val DATABASE_NAME = "tsummary.db"
 val DATABASE_VERSION = 1
@@ -42,6 +43,7 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
         val db = this.writableDatabase
         var values = ContentValues()
         values.put(TbUsuario.COL_TOKEN, sesion.authToken)
+
         val returnValue = db.update(TbUsuario.TABlE_NAME, values,
                 "${TbUsuario.COL_IMEI}=? AND ${TbUsuario.COL_ID_ABOGADO}=?",
                 arrayOf(sesion.getIMEI(), sesion.getIdAbogado().toString()))
@@ -133,14 +135,10 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
             values.put(TbHora.COL_ABO_ID, item.mAbogadoId)
             values.put(TbHora.COL_MODIFICABLE, item.mModificable)
             values.put(TbHora.COL_OFFLINE, item.mOffLine)
-
-            val dateFormat1 = SimpleDateFormat("yyyy-MM-dd")
-            values.put(TbHora.COL_FECHA_ULT_MOD, dateFormat1.format(item.mFechaUpdate))
+            values.put(TbHora.COL_FECHA_ULT_MOD, formatDate(item.mFechaUpdate))
             values.put(TbHora.COL_ESTADO, item.mEstado.value)
-            values.put(TbHora.COL_FECHA_HORA_INICIO, dateFormat1.format(item.mFechaIng))
-
-            val dateFormat2 = SimpleDateFormat("yyyy-MM-dd")
-            values.put(TbHora.COL_FECHA_ING, dateFormat2.format(item.mFechaIng))
+            values.put(TbHora.COL_FECHA_HORA_INICIO, formatDate(item.mFechaIng))
+            values.put(TbHora.COL_FECHA_ING, formatDate(item.mFechaIng))
             db.insert(TbHora.TABlE_NAME, null, values)
         }
         db.close()
@@ -160,22 +158,16 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
         values.put(TbHora.COL_MODIFICABLE, registro.mModificable)
         values.put(TbHora.COL_OFFLINE, registro.mOffLine)
         values.put(TbHora.COL_ESTADO, registro.mEstado.value)
-
-        val dateFormat1 = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
-        values.put(TbHora.COL_FECHA_ULT_MOD, dateFormat1.format(registro.mFechaUpdate))
-
+        values.put(TbHora.COL_FECHA_ING, formatDate(registro.mFechaIng))
+        values.put(TbHora.COL_FECHA_ULT_MOD, formatDate(registro.mFechaUpdate))
         values.put(TbHora.COL_FECHA_HORA_INICIO, "${registro.mInicio.horas}:${registro.mInicio.minutos}")
-
-        val dateFormat3 = SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss")
-        values.put(TbHora.COL_FECHA_ING, dateFormat3.format(registro.mFechaIng))
-
         val args = arrayOf<String>(registro.mId.toString())
         db.update(TbHora.TABlE_NAME, values, "${TbHora.COL_ID}=?", args)
         db.close()
         return true
     }
 
-    fun insertRegistroHora(registro: RegistroHora): Boolean {
+    fun insertRegistroHora(registro: RegistroHora): Long {
         val db = this.writableDatabase
 
         var values = ContentValues()
@@ -188,17 +180,17 @@ class DataBaseHandler(context: Context) : SQLiteOpenHelper(context, DATABASE_NAM
         values.put(TbHora.COL_MODIFICABLE, registro.mModificable)
         values.put(TbHora.COL_OFFLINE, registro.mOffLine)
         values.put(TbHora.COL_ESTADO, registro.mEstado.value)
-
-        val dateFormat1 = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
-        values.put(TbHora.COL_FECHA_ING, dateFormat1.format(registro.mFechaIng))
-
-        val dateFormat2 = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
-        values.put(TbHora.COL_FECHA_ULT_MOD, dateFormat2.format(registro.mFechaUpdate))
-
+        values.put(TbHora.COL_FECHA_ING, formatDate(registro.mFechaIng))
+        values.put(TbHora.COL_FECHA_ULT_MOD, formatDate(registro.mFechaUpdate))
         values.put(TbHora.COL_FECHA_HORA_INICIO, "${registro.mInicio.horas}:${registro.mInicio.minutos}")
-        db.insert(TbHora.TABlE_NAME, null, values)
+        val id = db.insert(TbHora.TABlE_NAME, null, values)
         db.close()
-        return true
+        return id
+    }
+
+    fun formatDate(date: Date): String {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss")
+        return dateFormat.format(date)
     }
 
     fun getListRegistroHoraByCodigoAndFecha(codigo: Int, fecha: String): List<RegistroHora> {

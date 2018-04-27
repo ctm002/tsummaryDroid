@@ -38,6 +38,9 @@ class ListHorasAdapter(val cursor: Cursor, context: Context) : RecyclerView.Adap
         holder.setCorrelativo(registro.mCorrelativo)
         holder.setHora(registro.getHoraTotal())
         holder.setHoraInicio(registro.getHoraInicio())
+
+
+        holder.setFecha(registro.getFechaIng())
     }
 
     override fun getItemCount(): Int {
@@ -50,7 +53,8 @@ class ListHorasAdapter(val cursor: Cursor, context: Context) : RecyclerView.Adap
         var mTxtBoxProyecto: TextView
         var mTxtBoxHora: TextView
         var mTxtBoxAsunto: TextView
-        var mTxtBoxHoraInicio : TextView
+        var mTxtBoxHoraInicio: TextView
+        var mTxtBoxFecha: TextView
         var mCorrelativo: Int
 
         init {
@@ -59,6 +63,7 @@ class ListHorasAdapter(val cursor: Cursor, context: Context) : RecyclerView.Adap
             this.mTxtBoxHora = this.itemView?.findViewById(R.id.tVHora)!!
             this.mTxtBoxAsunto = this.itemView?.findViewById(R.id.tVAsunto)!!
             this.mCorrelativo = 0
+            this.mTxtBoxFecha = this.itemView?.findViewById(R.id.tVFecha)!!
             this.mTxtBoxHoraInicio = this.itemView?.findViewById(R.id.tVHoraInicio)!!
         }
 
@@ -84,8 +89,12 @@ class ListHorasAdapter(val cursor: Cursor, context: Context) : RecyclerView.Adap
             this.mCorrelativo = _Correlativo
         }
 
-        fun setHoraInicio(_Hora: String){
+        fun setHoraInicio(_Hora: String) {
             this.mTxtBoxHoraInicio.setText(_Hora)
+        }
+
+        fun setFecha(_fecha: String) {
+            this.mTxtBoxFecha.setText(_fecha)
         }
     }
 

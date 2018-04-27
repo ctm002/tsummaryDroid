@@ -24,6 +24,7 @@ class RegistroHora {
     var mFechaInsert: Date = Date()
     var mFechaUpdate: Date = Date()
 
+
     fun getNombreCliente(): String? {
         return this.mProyecto?.cliente?.nombre
     }
@@ -33,11 +34,20 @@ class RegistroHora {
     }
 
     fun getHoraTotal(): String {
-        return "${String.format("%02d", mHoraTotal.horas)}:${String.format("%02d", mHoraTotal.minutos)}"
+
+        if (mHoraTotal.horas == 0)return "${String.format("%02d",mHoraTotal.minutos)} min"
+        if (mHoraTotal.minutos == 0)return "${String.format("%02d",mHoraTotal.horas)} hrs"
+
+        return "${String.format("%02d",mHoraTotal.horas)} hrs ${String.format("%02d",mHoraTotal.minutos)} min"
     }
 
     fun getHoraInicio(): String {
         return "${String.format("%02d", mInicio.horas)}:${String.format("%02d", mInicio.minutos)}"
+    }
+
+    fun getFechaIng(): String {
+        val formatDate = SimpleDateFormat("dd-MM")
+        return formatDate.format(this.mFechaIng)
     }
 
     constructor() {}
@@ -68,7 +78,7 @@ class RegistroHora {
         this.mHoraTotal.horas = cursor.getInt(cursor.getColumnIndex(TSContract.RegistroHora.COL_TIM_HORAS))
         this.mHoraTotal.minutos = cursor.getInt(cursor.getColumnIndex(TSContract.RegistroHora.COL_TIM_MINUTOS))
 
-        val strInicio =  cursor.getString(cursor.getColumnIndex(TSContract.RegistroHora.COL_FECHA_HORA_INICIO))
+        val strInicio = cursor.getString(cursor.getColumnIndex(TSContract.RegistroHora.COL_FECHA_HORA_INICIO))
         val arrInicio = strInicio.split(":")
         this.mInicio = Hora(arrInicio.get(0).toInt(), arrInicio.get(1).toInt())
     }

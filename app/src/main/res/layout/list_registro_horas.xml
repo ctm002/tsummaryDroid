@@ -22,24 +22,28 @@
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="0.2"
+            android:layout_weight="0.3"
+            android:background="@android:color/holo_orange_light"
+            android:gravity="center_horizontal|top"
             android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tVFecha"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/tVHoraInicio"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@android:color/holo_orange_dark"
-                android:gravity="left"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/tVAsunto" />
+                android:layout_height="wrap_content" />
+
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1.5"
+            android:layout_weight="1.2"
             android:background="@android:color/holo_purple"
             android:orientation="vertical">
 
@@ -56,7 +60,7 @@
             <TextView
                 android:id="@+id/tVProyecto"
                 android:layout_width="match_parent"
-                android:layout_height="24dp"
+                android:layout_height="wrap_content"
                 app:layout_constraintEnd_toStartOf="@+id/guideline4"
                 tools:layout_editor_absoluteY="80dp" />
 
@@ -74,7 +78,7 @@
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="0.3"
+            android:layout_weight="0.5"
             android:background="@android:color/holo_blue_bright"
             android:orientation="vertical"
             android:gravity="center_vertical|top">
@@ -86,7 +90,8 @@
                 android:layout_height="wrap_content"
                 android:text="00:00"
                 android:textColor="@android:color/black"
-                android:textSize="18sp"
+                android:gravity="top"
+                android:textSize="14sp"
                 android:textStyle="bold" />
 
             <ImageView

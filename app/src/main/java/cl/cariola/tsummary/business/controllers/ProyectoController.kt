@@ -43,7 +43,6 @@ class ProyectoController(context: Context) {
             registro = this.mDB.getRegistroHoraById(id)!!
         } else {
             registro = RegistroHora()
-            registro.mCorrelativo = correlativo
         }
 
         registro.mAbogadoId = abogadoId
@@ -61,7 +60,8 @@ class ProyectoController(context: Context) {
         if (registro.mId == 0) {
             registro.mFechaInsert = Date()
             registro.mEstado = Estados.NUEVO
-            this.mDB.insertRegistroHora(registro)
+            val newId = this.mDB.insertRegistroHora(registro)
+            registro.mId = newId.toInt()
         } else {
             registro.mFechaUpdate = Date()
             registro.mEstado = if (registro.mCorrelativo == 0) Estados.NUEVO else Estados.EDITADO
@@ -70,9 +70,10 @@ class ProyectoController(context: Context) {
 
         val sesionLocal = this.mDB.getSesionLocalByIdAbogado(abogadoId)!!
         //if (!sesionLocal.isExpired()) {
-        ApiClient.save(registro, sesionLocal.authToken)
+        val returnCorrelativo = ApiClient.save(registro, sesionLocal.authToken)
         registro.mEstado = Estados.ANTIGUO
         registro.mOffLine = false
+        registro.mCorrelativo = returnCorrelativo
         this.mDB.updateRegistroHora(registro)
         //}
     }

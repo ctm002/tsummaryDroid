@@ -223,7 +223,7 @@ object ApiClient
         return httpClient
     }
 
-    fun save(registro: RegistroHora, token: String)
+    fun save(registro: RegistroHora, token: String) : Int
     {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
         var JSONObjectRequest = JSONObject()
@@ -251,8 +251,9 @@ object ApiClient
         if  (objJSONResponse.get("data") != null)
         {
             val data = objJSONResponse.get("data") as JSONObject
-            registro.mCorrelativo = data.getInt("tim_correl")
+            return data.getInt("tim_correl")
         }
+        return 0
     }
 
     fun delete(registro: RegistroHora, token: String)
