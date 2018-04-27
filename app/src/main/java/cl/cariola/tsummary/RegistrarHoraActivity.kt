@@ -40,6 +40,8 @@ class RegistrarHoraActivity : AppCompatActivity() {
     lateinit var projects: List<Proyecto>
     lateinit var itemSelected: Proyecto
     lateinit var textAutocomplete: AutoCompleteTextView
+    lateinit var editTxtFechaIng: TextView
+
     private val TAG = "RegistrarHoraActivity"
     lateinit var mContext: Context
 
@@ -102,6 +104,24 @@ class RegistrarHoraActivity : AppCompatActivity() {
             this.itemSelected = this.projects.get(index)
             Log.d(TAG, itemSelected.id.toString())
         }
+
+        this.editTxtFechaIng.setOnClickListener {  view ->
+            val c = Calendar.getInstance()
+            val year = c.get(Calendar.YEAR)
+            val month = c.get(Calendar.MONTH)
+            val day = c.get(Calendar.DAY_OF_MONTH)
+
+            var dpDialog = DatePickerDialog(this, DatePickerDialog.OnDateSetListener
+            { view, year, month, day ->
+                val monthTemp = month + 1
+                val strFecha: String = "${year}-${String.format("%02d", monthTemp)}-${String.format("%02d", day)}"
+                this.startDate = strFecha
+                val date = dateFormat.parse(startDate)
+                var styleFormat = SimpleDateFormat("E, d MMMM")
+                this.editTxtFechaIng.setText(styleFormat.format(date))
+            }, year, month, day)
+            dpDialog.show()
+        }
     }
 
     private fun setTitleBarTools() {
@@ -118,8 +138,8 @@ class RegistrarHoraActivity : AppCompatActivity() {
         this.editTxtHorasTrab = findViewById(R.id.editTxtTrabHoras)
         this.editTxtMinTrab = findViewById(R.id.editTxtTrabMinutos)
         this.editTxtAsunto = findViewById(R.id.editTxtNotas)
-        this.textAutocomplete = findViewById<AutoCompleteTextView>(R.id.autoCompleteTextView)
-
+        this.textAutocomplete = findViewById(R.id.autoCompleteTextView)
+        this.editTxtFechaIng = findViewById(R.id.tvFechaIng)
         setHorasTrabajos()
         setHorasInicio()
     }
@@ -199,13 +219,6 @@ class RegistrarHoraActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        /*
-        var intent = Intent(this, SchedulerActivity::class.java)
-        intent.putExtra("fecha", this.startDate)
-        intent.putExtra("idAbogado", this.idAbogado)
-        startActivity(intent)
-
-        */
         val c = Calendar.getInstance()
         val year = c.get(Calendar.YEAR)
         val month = c.get(Calendar.MONTH)
