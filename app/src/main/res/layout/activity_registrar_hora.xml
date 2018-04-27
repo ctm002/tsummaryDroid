@@ -28,8 +28,7 @@
                 android:gravity="center_vertical"
 
                 android:text="Proyecto"
-                android:textSize="16sp"
-                android:textStyle="bold"
+                android:textSize="18sp"
                 app:layout_constraintBottom_toTopOf="@+id/autoCompleteTextView"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -65,7 +64,6 @@
                 android:text="Notas"
 
                 android:textSize="18sp"
-                android:textStyle="bold"
                 app:layout_constraintBottom_toTopOf="@+id/editTxtNotas"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="1.0"
@@ -100,7 +98,6 @@
                 android:text="@string/registro_hora_label_horas_inicio"
 
                 android:textSize="18sp"
-                android:textStyle="bold"
                 app:layout_constraintBottom_toTopOf="@+id/linearLayout2"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -217,7 +214,6 @@
                 android:gravity="center_vertical"
                 android:text="@string/registro_hora_label_horas_trabajadas"
                 android:textSize="18sp"
-                android:textStyle="bold"
                 app:layout_constraintBottom_toTopOf="@+id/linearLayout"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
@@ -338,9 +334,8 @@
                 android:layout_marginTop="8dp"
                 android:layout_weight="1"
                 android:drawableLeft="@mipmap/ic_calendar_black_3"
-                android:textSize="18sp"
-                android:textStyle="bold"
                 android:gravity="center_vertical"
+                android:textSize="18sp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/linearLayout2" />
