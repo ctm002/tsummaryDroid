@@ -11,6 +11,7 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
+import android.support.v7.widget.Toolbar
 import android.telephony.TelephonyManager
 import android.util.Log
 import android.view.Menu
@@ -48,7 +49,9 @@ class RegistrarHoraActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_registrar_hora)
-        actionBar?.setDisplayShowHomeEnabled(true)
+        //actionBar?.setDisplayShowHomeEnabled(true)
+        //actionBar?.setDisplayShowTitleEnabled(false)
+        //supportActionBar?.setDisplayHomeAsUpEnabled(false)
 
         loadProjets()
         initialize()
@@ -60,21 +63,22 @@ class RegistrarHoraActivity : AppCompatActivity() {
         val gson = Gson()
         var registro = gson.fromJson(regJSON, RegistroHora::class.java)
         loadData(registro)
-        setTitleBarTools()
         this.mContext = this
 
-        supportActionBar?.setDisplayHomeAsUpEnabled(false)
+        val toolBar =  findViewById<Toolbar>(R.id.tool_bar_registrar_hora)
+        toolBar.setTitle("")
+        setSupportActionBar(toolBar)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_scheduler, menu)
+        menuInflater.inflate(R.menu.menu_registrar_hora, menu)
         return super.onCreateOptionsMenu(menu)
     }
 
     private fun loadData(registro: RegistroHora) {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd")
         this.startDate = dateFormat.format(registro.mFechaIng)
-        setTitle(this.startDate)
+        //setTitle(this.startDate)
 
         this.id = registro.mId
         this.idAbogado = registro.mAbogadoId
@@ -122,8 +126,14 @@ class RegistrarHoraActivity : AppCompatActivity() {
             }, year, month, day)
             dpDialog.show()
         }
+
+
+        val date = dateFormat.parse(startDate)
+        var styleFormat = SimpleDateFormat("E, d MMMM")
+        editTxtFechaIng.setText(styleFormat.format(date))
     }
 
+    /*
     private fun setTitleBarTools() {
         val dateFormat = SimpleDateFormat("yyyy-MM-dd")
         val date = dateFormat.parse(startDate)
@@ -131,6 +141,7 @@ class RegistrarHoraActivity : AppCompatActivity() {
         var styleFormat = SimpleDateFormat("E, d MMMM")
         setTitle(styleFormat.format(date))
     }
+    */
 
     private fun initialize() {
         this.editTxtHorasIni = findViewById(R.id.editTxtInicioHoras)
@@ -219,6 +230,7 @@ class RegistrarHoraActivity : AppCompatActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        /*
         val c = Calendar.getInstance()
         val year = c.get(Calendar.YEAR)
         val month = c.get(Calendar.MONTH)
@@ -229,19 +241,29 @@ class RegistrarHoraActivity : AppCompatActivity() {
             val monthTemp = month + 1
             val strFecha: String = "${year}-${String.format("%02d", monthTemp)}-${String.format("%02d", day)}"
             this.startDate = strFecha
-            setTitleBarTools()
+            //setTitleBarTools()
         }, year, month, day)
         dpDialog.show()
-
+        */
+        when(item?.itemId) {
+            R.id.action_eliminar -> {
+                val task = EliminarTask()
+                task.execute(this.id.toString())
+            }
+            R.id.action_guardar -> {
+                registrarHora()
+            }
+        }
         return true
     }
 
     private fun btnSaveSetOnClickListener() {
         try {
+            /*
             val btnGuardar = findViewById<Button>(R.id.btnGuardar)
             btnGuardar.setOnClickListener {
                 registrarHora()
-            }
+            }*/
         } catch (ex: Exception) {
             Toast.makeText(this, ex.message, Toast.LENGTH_LONG).show()
         }
@@ -253,11 +275,13 @@ class RegistrarHoraActivity : AppCompatActivity() {
     }
 
     private fun btnDeleteSetOnClickListener() {
+        /*
         val btnEliminar = findViewById<Button>(R.id.btnResetData)
         btnEliminar.setOnClickListener {
             val task = EliminarTask()
             task.execute(this.id.toString())
         }
+        */
     }
 
     fun isValid(): Boolean {
