@@ -1,22 +1,17 @@
 package cl.cariola.tsummary
 
-import android.Manifest
-import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.AsyncTask
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.support.v4.app.ActivityCompat
-import android.support.v4.content.ContextCompat
 import android.support.v7.widget.Toolbar
-import android.telephony.TelephonyManager
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import cl.cariola.tsummary.business.controllers.ProyectoController
 import cl.cariola.tsummary.business.entities.Proyecto
@@ -25,6 +20,9 @@ import com.google.gson.Gson
 import kotlinx.android.synthetic.main.activity_registrar_hora.*
 import java.text.SimpleDateFormat
 import java.util.*
+import android.app.Activity
+
+
 
 class RegistrarHoraActivity : AppCompatActivity() {
     var startDate: String = ""
@@ -40,19 +38,21 @@ class RegistrarHoraActivity : AppCompatActivity() {
     lateinit var editTxtAsunto: EditText
     lateinit var projects: List<Proyecto>
     lateinit var itemSelected: Proyecto
-    lateinit var textAutocomplete: AutoCompleteTextView
+    lateinit var editTxtProyectos: AutoCompleteTextView
     lateinit var editTxtFechaIng: TextView
 
     private val TAG = "RegistrarHoraActivity"
     lateinit var mContext: Context
 
+
+    override fun onStart() {
+        super.onStart()
+
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_registrar_hora)
-        //actionBar?.setDisplayShowHomeEnabled(true)
-        //actionBar?.setDisplayShowTitleEnabled(false)
-        //supportActionBar?.setDisplayHomeAsUpEnabled(false)
-
         loadProjets()
         initialize()
         btnDeleteSetOnClickListener()
@@ -66,8 +66,26 @@ class RegistrarHoraActivity : AppCompatActivity() {
         this.mContext = this
 
         val toolBar =  findViewById<Toolbar>(R.id.tool_bar_registrar_hora)
-        toolBar.setTitle("")
+        toolBar.setTitle("Scheduler")
         setSupportActionBar(toolBar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+
+        val imm = getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        //Hide:
+        //imm.toggleSoftInput(InputMethodManager.HIDE_IMPLICIT_ONLY, 0)
+        //Show
+        //imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, 0)
+
+        if (editTxtProyectos.text.toString().isEmpty())
+            showSoftKeyboard(editTxtProyectos)
+    }
+
+    fun showSoftKeyboard(view: View) {
+        if (view.requestFocus()) {
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(view, InputMethodManager.HIDE_IMPLICIT_ONLY)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -93,14 +111,14 @@ class RegistrarHoraActivity : AppCompatActivity() {
 
         if (registro.mProyecto != null) {
             this.itemSelected = registro.mProyecto!!
-            this.textAutocomplete.setText("${registro.getNombreCliente()} ${registro.mProyecto?.nombre}")
-            this.autoCompleteTextView.setSelection(this.textAutocomplete.text.length)
+            this.editTxtProyectos.setText("${registro.getNombreCliente()} ${registro.mProyecto?.nombre}")
+            this.autoCompleteTextView.setSelection(this.editTxtProyectos.text.length)
         }
 
         val aListProyectos = this.projects.map { p -> "${p.cliente.nombre} ${p.nombre}" } as ArrayList<String>
-        this.textAutocomplete.setAdapter(ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, aListProyectos))
-        this.textAutocomplete.threshold = 2
-        this.textAutocomplete.setOnItemClickListener { parent, view, position, id ->
+        this.editTxtProyectos.setAdapter(ArrayAdapter<String>(this, android.R.layout.simple_dropdown_item_1line, aListProyectos))
+        this.editTxtProyectos.threshold = 2
+        this.editTxtProyectos.setOnItemClickListener { parent, view, position, id ->
             val selected = parent.getItemAtPosition(position) as String
             Log.d(TAG, selected)
             val index = aListProyectos.indexOf(selected)
@@ -149,7 +167,7 @@ class RegistrarHoraActivity : AppCompatActivity() {
         this.editTxtHorasTrab = findViewById(R.id.editTxtTrabHoras)
         this.editTxtMinTrab = findViewById(R.id.editTxtTrabMinutos)
         this.editTxtAsunto = findViewById(R.id.editTxtNotas)
-        this.textAutocomplete = findViewById(R.id.autoCompleteTextView)
+        this.editTxtProyectos = findViewById(R.id.autoCompleteTextView)
         this.editTxtFechaIng = findViewById(R.id.tvFechaIng)
         setHorasTrabajos()
         setHorasInicio()
@@ -252,6 +270,15 @@ class RegistrarHoraActivity : AppCompatActivity() {
             }
             R.id.action_guardar -> {
                 registrarHora()
+            }
+            else ->
+            {
+                val intent = Intent()
+                val bundle = Bundle()
+                bundle.putString("fecha", startDate)
+                intent.putExtras(bundle)
+                setResult(0, intent)
+                finish()
             }
         }
         return true
